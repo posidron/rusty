@@ -1,86 +1,129 @@
-# Rusty
+# Rusty Language
 
-A JavaScript-like scripting language implemented in Rust, designed to provide a safe and performant alternative to JavaScript.
+A JavaScript-like scripting language implemented in Rust.
 
-## Features
+## Overview
 
-- Lexical analysis (tokenization)
-- Abstract Syntax Tree (AST) parsing
-- Interpreter for executing code
-- Support for:
-  - Variables and assignments
-  - Functions and function calls
-  - Control flow (if/else, while loops)
-  - Basic arithmetic operations
-  - String operations
-  - Boolean operations
-  - Comments
+Rusty is a simple yet powerful scripting language that features:
 
-## Example
+- JavaScript-like syntax
+- Variables and basic data types
+- Functions and control flow
+- A built-in standard library
+- Interactive REPL
 
-```javascript
-// Variable declaration and printing
-var greeting = "Hello, World!";
-print greeting;
+## Getting Started
 
-// Function definition and usage
-fun add(a, b) {
-    return a + b;
-}
-var result = add(5, 3);
-print result;
+### Building the Project
 
-// Conditional statements
-if (result > 5) {
-    print "Result is greater than 5";
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/rusty.git
+cd rusty
+
+# Build the project
+cargo build --release
+```
+
+### Running the REPL
+
+```bash
+# Run in interactive mode
+cargo run --bin repl
+
+# Execute a script file
+cargo run --bin repl path/to/your/script.ry
+```
+
+## Language Features
+
+### Variables and Data Types
+
+```
+// Variables
+var x = 42;
+var name = "Rusty";
+var is_cool = true;
+var nothing = nil;
+
+// Printing values
+print x;
+print name;
+```
+
+### Control Flow
+
+```
+// If-else statement
+if (x > 10) {
+    print "Greater than 10";
 } else {
-    print "Result is less than or equal to 5";
+    print "Less than or equal to 10";
 }
 
-// Loops
+// While loop
 var counter = 0;
-while (counter < 3) {
+while (counter < 5) {
     print counter;
     counter = counter + 1;
 }
 ```
 
-## Building and Running
+### Functions
 
-1. Make sure you have Rust installed (https://rustup.rs/)
-2. Clone this repository
-3. Build the project:
-   ```bash
-   cargo build
-   ```
-4. Run the example:
-   ```bash
-   cargo run --example hello_world
-   ```
+```
+// Function definition
+fun add(a, b) {
+    return a + b;
+}
 
-## Project Structure
+// Function call
+var result = add(5, 3);
+print result;
+```
 
-- `src/lexer.rs`: Tokenizes source code into tokens
-- `src/ast_parser.rs`: Parses tokens into an Abstract Syntax Tree
-- `src/interpreter.rs`: Executes the AST
-- `examples/`: Contains example code demonstrating the language features
+### Operations
 
-## Safety Features
+```
+// Arithmetic
+var a = 5 + 3 * 2;
+var b = (5 + 3) * 2;
 
-This implementation leverages Rust's type system and ownership model to prevent:
-- Memory leaks
-- Buffer overflows
-- Null pointer dereferences
-- Data races
-- Other common memory-related bugs
+// Comparison
+var c = a > b;
+var d = a == b;
 
-## Future Improvements
+// Logical
+var e = true && false;
+var f = true || false;
+```
 
-- [ ] Add support for classes and objects
-- [ ] Implement standard library functions
-- [ ] Add support for arrays and objects
-- [ ] Implement error handling with try/catch
-- [ ] Add support for modules and imports
-- [ ] Implement garbage collection
-- [ ] Add support for async/await
-- [ ] Create a REPL (Read-Eval-Print Loop)
+## Standard Library
+
+Rusty comes with a built-in standard library that provides various functions:
+
+- Math functions: `random`, `random_range`, `abs`, `round`, `floor`, `ceil`, `min`, `max`
+- String functions: `len`, `upper`, `lower`, `as_string`
+- Time functions: `time`
+
+See [Standard Library Documentation](docs/stdlib.md) for details.
+
+## Examples
+
+Check out the examples directory for sample scripts:
+
+- [Hello World](examples/hello_world.rs)
+- [Standard Library Demo](examples/stdlib_demo.ry)
+
+## REPL Commands
+
+The interactive REPL supports the following commands:
+
+- `.exit` - Exit the REPL
+- `.help` - Show help message
+- `.clear` - Clear the screen
+- `.load <filename>` - Load and execute a script file
+
+## License
+
+MIT

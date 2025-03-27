@@ -1,5 +1,6 @@
 use crate::ast_parser::{Expr, Literal, Stmt};
 use crate::lexer::{Token, TokenType};
+use crate::stdlib::StdLib;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -9,6 +10,7 @@ pub enum Value {
     String(String),
     Boolean(bool),
     Function(Rc<Function>),
+    NativeFunction(Rc<NativeFunction>),
     Nil,
 }
 
@@ -19,11 +21,25 @@ pub struct Function {
     pub body: Vec<Stmt>,
 }
 
+#[derive(Debug, Clone)]
+pub struct NativeFunction {
+    pub name: String,
+    pub arity: usize,
+    pub function: fn(Vec<Value>) -> Result<Value, String>,
+}
+
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {
         // Two functions are equal if they have the same name
         // This is a simplification, but works for our purposes
         self.name.lexeme == other.name.lexeme
+    }
+}
+
+impl PartialEq for NativeFunction {
+    fn eq(&self, other: &Self) -> bool {
+        // Two native functions are equal if they have the same name
+        self.name == other.name
     }
 }
 
@@ -33,6 +49,16 @@ impl Function {
             name: Token::new(TokenType::Identifier(name.clone()), name, None, 0, 0),
             params,
             body,
+        })
+    }
+}
+
+impl NativeFunction {
+    pub fn new(name: String, arity: usize, function: fn(Vec<Value>) -> Result<Value, String>) -> Rc<Self> {
+        Rc::new(NativeFunction {
+            name,
+            arity,
+            function,
         })
     }
 }
@@ -104,9 +130,17 @@ pub struct Interpreter {
 
 impl Interpreter {
     pub fn new() -> Self {
-        Interpreter {
+        let mut interpreter = Interpreter {
             environment: Environment::new(None),
+        };
+
+        // Initialize standard library
+        let stdlib = StdLib::new();
+        for (name, function) in stdlib.get_functions() {
+            interpreter.environment.define(name.clone(), Value::NativeFunction(function.clone()));
         }
+
+        interpreter
     }
 
     pub fn interpret(&mut self, statements: Vec<Stmt>) -> Result<(), String> {
@@ -276,6 +310,20 @@ impl Interpreter {
 
                 match callee_value {
                     Value::Function(function) => self.call_function(&function, argument_values),
+                    Value::NativeFunction(function) => {
+                        if argument_values.len() != function.arity {
+                            return Err(RuntimeError::Error(format!(
+                                "Expected {} arguments but got {}.",
+                                function.arity,
+                                argument_values.len()
+                            )));
+                        }
+
+                        match (function.function)(argument_values) {
+                            Ok(value) => Ok(value),
+                            Err(message) => Err(RuntimeError::Error(message)),
+                        }
+                    },
                     _ => Err(RuntimeError::Error("Can only call functions.".to_string())),
                 }
             }
@@ -349,6 +397,7 @@ impl Interpreter {
             Value::Boolean(b) => b.to_string(),
             Value::Nil => "nil".to_string(),
             Value::Function(f) => format!("<fn {}>", f.name.lexeme),
+            Value::NativeFunction(f) => format!("<native fn {}>", f.name),
         }
     }
 }
