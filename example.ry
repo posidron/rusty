@@ -1,0 +1,34 @@
+// Example Rusty language script file
+
+// Variables and printing
+var message = "Hello from example.ry!";
+print message;
+
+// Function definition
+fun factorial(n) {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
+// Calculate factorial of 5
+var result = factorial(5);
+print "Factorial of 5 is:";
+print result;
+
+// Conditional logic
+if (result > 100) {
+    print "That's a big number!";
+} else {
+    print "Not too big.";
+}
+
+// Loop from 1 to 5
+var counter = 1;
+print "Counting:";
+while (counter <= 5) {
+    print counter;
+    counter = counter + 1;
+}

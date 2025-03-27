@@ -11,3 +11,8 @@ description = "A JavaScript-like scripting language implemented in Rust"
 thiserror = "1.0"
 anyhow = "1.0"
 logos = "0.13"
+rand = "0.8.5"
+
+[[bin]]
+name = "repl"
+path = "src/bin/repl.rs"
