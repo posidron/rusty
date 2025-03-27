@@ -38,6 +38,42 @@ cargo run --bin repl
 cargo run --bin repl path/to/your/script.ry
 ```
 
+### Building a Release Executable
+
+To build a standalone executable that you can use directly:
+
+```bash
+# Build in release mode
+cargo build --release
+
+# The executable will be in the target/release directory
+# For Unix/Linux/macOS
+./target/release/repl
+
+# For Windows
+.\target\release\repl.exe
+```
+
+You can copy this executable to a location in your PATH for easy access:
+
+```bash
+# For Unix/Linux/macOS
+cp ./target/release/repl /usr/local/bin/rusty
+
+# For Windows (using PowerShell):
+# Copy-Item .\target\release\repl.exe -Destination "C:\Windows\System32\rusty.exe"
+```
+
+Then you can run scripts with:
+
+```bash
+# Run the REPL in interactive mode
+rusty
+
+# Execute a script file
+rusty path/to/your/script.ry
+```
+
 ## Language Features
 
 ### Variables and Data Types
@@ -247,5 +283,4 @@ Check out the examples directory for sample scripts:
 - [JSON Utilities](examples/json_utils.ry): Helper functions for easier JSON handling
 - [JSON with Files](examples/json_file_example.ry): Configuration management with JSON files
 - [Regex Demo](examples/regex_demo.ry): Basic regular expression operations
-- [Regex Utilities](examples/regex_utils.ry): Helper functions for easier regex usage
-- [Log Analyzer](examples/log_analyzer.ry): Practical example of regex for log parsing
+- [Log Analyzer](examples/log_analyzer.ry): Practical example of regex for log analysis
