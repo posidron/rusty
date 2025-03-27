@@ -1,0 +1,79 @@
+// Simple regex test script
+
+print "--- Regex Debug Test ---";
+
+// Let's try to understand the string representation first
+print "\nTesting string representation:";
+var s1 = "abc";
+print "Simple string: " + s1;
+
+var s2 = "a\\bc";
+print "String with backslash: " + s2;
+
+var s3 = "a\\\\bc";
+print "String with double backslash: " + s3;
+
+// Now testing with exact number pattern
+print "\nTrying with explicit number pattern:";
+var num_pattern = "[0-9]+";
+print "Pattern: " + num_pattern;
+var num_regex = regex_new(num_pattern);
+print "Testing '123':";
+print regex_test(num_regex, "123");
+print "Testing 'abc':";
+print regex_test(num_regex, "abc");
+
+// Try with explicit word character pattern
+print "\nTrying with explicit word pattern:";
+var word_pattern = "[a-zA-Z]+";
+print "Pattern: " + word_pattern;
+var word_regex = regex_new(word_pattern);
+print "Testing 'abc':";
+print regex_test(word_regex, "abc");
+print "Testing '123':";
+print regex_test(word_regex, "123");
+
+// Try an exact match pattern
+print "\nTrying with exact match pattern:";
+var exact_pattern = "^abc$";
+print "Pattern: " + exact_pattern;
+var exact_regex = regex_new(exact_pattern);
+print "Testing 'abc':";
+print regex_test(exact_regex, "abc");
+print "Testing 'abcd':";
+print regex_test(exact_regex, "abcd");
+
+// Try finding matches
+print "\nTrying to find matches:";
+var find_pattern = "[0-9]+";
+print "Pattern: " + find_pattern;
+var find_regex = regex_new(find_pattern);
+var test_text = "abc123def456ghi";
+print "Text: " + test_text;
+var matches = regex_match_all(find_regex, test_text);
+print "Matches found:";
+print matches;
+
+// Try split
+print "\nTrying split:";
+var split_pattern = ",";
+print "Pattern: " + split_pattern;
+var split_regex = regex_new(split_pattern);
+var csv_text = "apple,orange,banana";
+print "Text: " + csv_text;
+var parts = regex_split(split_regex, csv_text);
+print "Split parts:";
+print parts;
+
+// Try capture
+print "\nTrying capture:";
+var cap_pattern = "([a-z]+)=([0-9]+)";
+print "Pattern: " + cap_pattern;
+var cap_regex = regex_new(cap_pattern);
+var cap_text = "width=100";
+print "Text: " + cap_text;
+var captures = regex_capture(cap_regex, cap_text);
+print "Captures:";
+print captures;
+
+print "\nTest completed.";

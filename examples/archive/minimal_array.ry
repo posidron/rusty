@@ -1,0 +1,30 @@
+// Minimal array demo
+
+// Create empty array
+var arr = array();
+print "Empty array:";
+print arr;
+
+// Add elements
+arr = push(arr, 1);
+arr = push(arr, 2);
+arr = push(arr, 3);
+print "After adding elements:";
+print arr;
+
+// Create array containing 3 elements
+var arr2 = array();
+arr2 = push(arr2, "a");
+arr2 = push(arr2, "b");
+arr2 = push(arr2, "c");
+print "Second array:";
+print arr2;
+
+// Convert to JSON
+var json = json_stringify(arr);
+print "First array as JSON:";
+print json;
+
+var json2 = json_stringify(arr2);
+print "Second array as JSON:";
+print json2;

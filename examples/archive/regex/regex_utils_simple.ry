@@ -1,0 +1,33 @@
+// Simple Regex Utilities Demo
+
+print "--- Simple Regex Utilities Demo ---";
+
+// Get a regex object
+var pattern = "[0-9]+";
+var regex = regex_new(pattern);
+print "Created pattern: " + pattern;
+
+// Test a match
+print "Does '123' match? " + as_string(regex_test(regex, "123"));
+print "Does 'abc' match? " + as_string(regex_test(regex, "abc"));
+
+// Find matches
+var text = "The quick brown fox jumps over the 123 lazy 456 dogs";
+var matches = regex_match_all(regex, text);
+print "Matches found:";
+print matches;
+
+// Split text
+var split_text = "apple,orange,banana";
+var parts = regex_split(regex_new(","), split_text);
+print "Split parts:";
+print parts;
+
+// Capture
+var capture_pattern = "([a-z]+)=([0-9]+)";
+var capture_text = "width=100";
+var captures = regex_capture(regex_new(capture_pattern), capture_text);
+print "Captures:";
+print captures;
+
+print "\nDemo completed.";

@@ -1,0 +1,69 @@
+// Array Demo for Rusty Language
+
+print "--- Array Functions Demo ---";
+
+// Creating arrays
+print "\nCreating arrays:";
+var numbers = array(1, 2, 3, 4, 5);
+print "Numbers array:";
+print numbers;
+
+var mixed = array("hello", 42, true, nil);
+print "Mixed array:";
+print mixed;
+
+// Getting array length
+print "\nArray length:";
+var len = length(numbers);
+print "Length of numbers array: " + as_string(len);
+
+// Accessing elements
+print "\nAccessing elements:";
+var first = get(numbers, 0);
+var third = get(numbers, 2);
+print "First element: " + as_string(first);
+print "Third element: " + as_string(third);
+
+// Modifying elements
+print "\nModifying elements:";
+var modified = set(numbers, 1, 99);
+print "After setting index 1 to 99:";
+print modified;
+
+// Adding elements
+print "\nAdding elements:";
+var extended = push(numbers, 6);
+print "After pushing 6:";
+print extended;
+
+// Removing elements
+print "\nRemoving elements:";
+var popped = pop(extended);
+print "Popped element: " + as_string(popped);
+print "After popping:";
+print extended;  // Note: this won't actually change since extended is immutable
+
+// Joining arrays
+print "\nJoining array elements:";
+var joined = join(numbers, ", ");
+print "Joined numbers: " + joined;
+
+// Concatenating arrays
+print "\nConcatenating arrays:";
+var more_numbers = array(6, 7, 8);
+var combined = concat(numbers, more_numbers);
+print "Combined array:";
+print combined;
+
+// Nesting arrays
+print "\nNested arrays:";
+var nested = array(
+    array(1, 2),
+    array(3, 4),
+    array(5, 6)
+);
+print nested;
+print "First nested array:";
+print get(nested, 0);
+
+print "\nDemo completed.";

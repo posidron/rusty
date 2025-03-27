@@ -11,6 +11,7 @@ pub enum Value {
     Boolean(bool),
     Function(Rc<Function>),
     NativeFunction(Rc<NativeFunction>),
+    Array(Vec<Value>),
     Nil,
 }
 
@@ -311,17 +312,24 @@ impl Interpreter {
                 match callee_value {
                     Value::Function(function) => self.call_function(&function, argument_values),
                     Value::NativeFunction(function) => {
-                        if argument_values.len() != function.arity {
+                        // Special case for variadic functions that can take any number of arguments
+                        if (function.name == "file" && (argument_values.len() == 2 || argument_values.len() == 3)) ||
+                           (function.name == "array") {
+                            match (function.function)(argument_values) {
+                                Ok(value) => Ok(value),
+                                Err(message) => Err(RuntimeError::Error(message)),
+                            }
+                        } else if argument_values.len() != function.arity {
                             return Err(RuntimeError::Error(format!(
                                 "Expected {} arguments but got {}.",
                                 function.arity,
                                 argument_values.len()
                             )));
-                        }
-
-                        match (function.function)(argument_values) {
-                            Ok(value) => Ok(value),
-                            Err(message) => Err(RuntimeError::Error(message)),
+                        } else {
+                            match (function.function)(argument_values) {
+                                Ok(value) => Ok(value),
+                                Err(message) => Err(RuntimeError::Error(message)),
+                            }
                         }
                     },
                     _ => Err(RuntimeError::Error("Can only call functions.".to_string())),
@@ -398,6 +406,17 @@ impl Interpreter {
             Value::Nil => "nil".to_string(),
             Value::Function(f) => format!("<fn {}>", f.name.lexeme),
             Value::NativeFunction(f) => format!("<native fn {}>", f.name),
+            Value::Array(elements) => {
+                let mut result = String::from("[");
+                for (i, value) in elements.iter().enumerate() {
+                    if i > 0 {
+                        result.push_str(", ");
+                    }
+                    result.push_str(&self.stringify(value.clone()));
+                }
+                result.push_str("]");
+                result
+            },
         }
     }
 }

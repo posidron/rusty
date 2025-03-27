@@ -1,0 +1,52 @@
+// Unified File Function Demo for Rusty Language
+
+print "--- Unified File Function Demo ---";
+
+// Define a file path for our demo
+var filename = "unified_demo_data.txt";
+
+// Check if file exists using file(path, "e")
+print "Checking if file exists:";
+var exists = file(filename, "e");
+print exists;
+
+// Write to the file using file(path, "w", content)
+print "";
+print "Writing to file:";
+var content = "Hello from the unified file API!";
+var written = file(filename, "w", content);
+print written;
+
+// Read from the file using file(path, "r")
+print "";
+print "Reading from file:";
+var file_content = file(filename, "r");
+print file_content;
+
+// Append to the file using file(path, "a", content)
+print "";
+print "Appending to file:";
+var append_content = "\nThis line was appended.";
+var appended = file(filename, "a", append_content);
+print appended;
+
+// Read the updated content
+print "";
+print "Reading updated content:";
+var updated_content = file(filename, "r");
+print updated_content;
+
+// Delete the file using file(path, "d")
+print "";
+print "Deleting file:";
+var deleted = file(filename, "d");
+print deleted;
+
+// Verify file is gone
+print "";
+print "Checking if file still exists:";
+var after_delete = file(filename, "e");
+print after_delete;
+
+print "";
+print "Demo completed.";

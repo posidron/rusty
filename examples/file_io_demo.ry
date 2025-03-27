@@ -1,0 +1,81 @@
+// File I/O Demo for Rusty Language
+
+print "--- File I/O Demo ---";
+
+// Define a file path for our demo
+var filename = "demo_data.txt";
+
+// Check if file already exists (clean up from previous runs)
+if (file_exists(filename)) {
+    print "File already exists, deleting it...";
+    var deleted = delete_file(filename);
+    if (deleted) {
+        print "File deleted successfully.";
+    } else {
+        print "Failed to delete file.";
+    }
+}
+
+// Write data to a new file
+print "";
+print "Writing data to file...";
+var content = "Hello from Rusty Language!
+This is a test file.
+";
+var written = write_file(filename, content);
+
+if (written) {
+    print "Data written successfully.";
+} else {
+    print "Failed to write data.";
+}
+
+// Verify file exists
+print "";
+print "Checking if file exists...";
+var exists = file_exists(filename);
+print "File exists: " + as_string(exists);
+
+// Read the file contents
+print "";
+print "Reading file contents:";
+var file_content = read_file(filename);
+print file_content;
+
+// Append more data to the file
+print "";
+print "Appending data to file...";
+var timestamp = time();
+var append_content = "File modified at timestamp: " + as_string(timestamp);
+var appended = append_file(filename, append_content);
+
+if (appended) {
+    print "Data appended successfully.";
+} else {
+    print "Failed to append data.";
+}
+
+// Read the updated file contents
+print "";
+print "Reading updated file contents:";
+var updated_content = read_file(filename);
+print updated_content;
+
+// Demonstrate error handling
+print "";
+print "Demonstrating error handling:";
+print "Trying to read a non-existent file:";
+
+// Using try-catch-like pattern with conditional checking
+var nonexistent_file = "does_not_exist.txt";
+
+// We'll use file_exists instead since our error handling is basic
+if (!file_exists(nonexistent_file)) {
+    print "Error: File not found as expected.";
+}
+
+// Clean up at the end
+print "";
+print "Cleaning up...";
+delete_file(filename);
+print "Demo completed.";
