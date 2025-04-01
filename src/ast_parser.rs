@@ -327,7 +327,33 @@ impl Parser {
             self.consume(TokenType::RightParen, "Expect ')' after expression.")?;
             return Ok(Expr::Grouping(Box::new(expr)));
         }
+        if self.match_token(&[TokenType::LeftBracket]) {
+            return self.array_literal();
+        }
         Err("Expect expression.".to_string())
+    }
+
+    fn array_literal(&mut self) -> Result<Expr, String> {
+        self.skip_newlines();
+
+        let mut elements = Vec::new();
+
+        if !self.check(TokenType::RightBracket) {
+            loop {
+                self.skip_newlines();
+                elements.push(self.expression()?);
+                self.skip_newlines();
+
+                if !self.match_token(&[TokenType::Comma]) {
+                    break;
+                }
+
+                self.skip_newlines();
+            }
+        }
+
+        self.consume(TokenType::RightBracket, "Expect ']' after array elements.")?;
+        Ok(Expr::Array(elements))
     }
 
     fn call(&mut self) -> Result<Expr, String> {

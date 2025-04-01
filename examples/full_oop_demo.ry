@@ -25,18 +25,13 @@ print "Number to string: " + str.string(42.5);
 
 // Array Namespace Demo
 print "\n== Array Namespace ==";
-var arr = Array();
-var numbers = arr.create();  // Use create() to initialize an array
-print "Created empty array";
-numbers = arr.push(numbers, 10);
-numbers = arr.push(numbers, 20);
-numbers = arr.push(numbers, 30);
-print "Array after push: " + str.string(numbers);
-print "Length: " + str.string(arr.length(numbers));
-print "First element: " + str.string(arr.get(numbers, 0));
-var modified = arr.set(numbers, 1, 25);
+var numbers = [10, 20, 30];  // Use array literal syntax
+print "Created array with values: " + str.string(numbers);
+print "Length: " + str.string(Array.length(numbers));
+print "First element: " + str.string(Array.get(numbers, 0));
+var modified = Array.set(numbers, 1, 25);
 print "After setting index 1 to 25: " + str.string(modified);
-var joined = arr.join(numbers, " | ");
+var joined = Array.join(numbers, " | ");
 print "Joined: " + joined;
 
 // Time Namespace Demo
@@ -65,17 +60,11 @@ print "File deleted: " + str.string(!file.exists(test_file));
 print "\n== JSON Namespace ==";
 var json = JSON();
 
-// Create a person object
-var person = arr.create();
-var nameProperty = arr.create();
-nameProperty = arr.push(nameProperty, "name");
-nameProperty = arr.push(nameProperty, "Alice");
-person = arr.push(person, nameProperty);
-
-var ageProperty = arr.create();
-ageProperty = arr.push(ageProperty, "age");
-ageProperty = arr.push(ageProperty, 30);
-person = arr.push(person, ageProperty);
+// Create a person object using array literals
+var person = [
+    ["name", "Alice"],
+    ["age", 30]
+];
 
 // Convert to JSON
 var jsonStr = json.stringify(person);
@@ -83,8 +72,8 @@ print "JSON string: " + jsonStr;
 
 // Parse JSON
 var parsed = json.parse(jsonStr);
-print "Parsed name: " + str.string(arr.get(arr.get(parsed, 0), 1));
-print "Parsed age: " + str.string(arr.get(arr.get(parsed, 1), 1));
+print "Parsed name: " + str.string(Array.get(Array.get(parsed, 0), 1));
+print "Parsed age: " + str.string(Array.get(Array.get(parsed, 1), 1));
 
 // Regex Namespace Demo
 print "\n== Regex Namespace ==";

@@ -1,0 +1,18 @@
+// Simple test for ArrayMethods
+
+// Get string namespace for formatting
+var str = String();
+
+// Execute ArrayMethods() to get the namespace
+var am = ArrayMethods();
+print "ArrayMethods(): " + str.string(am);
+
+// Create an array
+var numbers = Array(1, 2, 3);
+print "numbers: " + str.string(numbers);
+
+// Try to use methods
+print "Length: " + str.string(am.length(numbers));
+print "Get element 1: " + str.string(am.get(numbers, 1));
+var extended = am.push(numbers, 4);
+print "After push: " + str.string(extended);

@@ -417,23 +417,22 @@ str.string(42)             // Returns "42"
 The Array namespace provides functions for working with arrays.
 
 ```rusty
-var arr = Array();
+// Creating arrays
+var empty = Array();            // Creates an empty array
+var numbers = Array(1, 2, 3);   // Creates array with values [1, 2, 3]
+var mixed = Array("hello", 42, true); // Mixed types
 
-// Create an array
-var numbers = arr.create();  // Empty array - NOTE: Array() directly doesn't create an array
-numbers = arr.push(numbers, 1);
-numbers = arr.push(numbers, 2);
-numbers = arr.push(numbers, 3);
+// Get the array methods namespace
+var am = ArrayMethods();
 
-// Methods
-arr.create()                // Creates a new empty array
-arr.length(numbers)         // Returns 3
-arr.push(numbers, 4)        // Returns [1, 2, 3, 4]
-arr.pop(numbers)            // Removes and returns the last element
-arr.get(numbers, 0)         // Returns 1 (first element)
-arr.set(numbers, 1, 99)     // Returns [1, 99, 3]
-arr.concat(arr1, arr2)      // Combines two arrays
-arr.join(numbers, ", ")     // Joins array elements into a string with separator
+// Array operations
+am.length(numbers)         // Returns 3
+am.push(numbers, 4)        // Returns [1, 2, 3, 4]
+am.pop(numbers)            // Removes and returns the last element
+am.get(numbers, 0)         // Returns 1 (first element)
+am.set(numbers, 1, 99)     // Returns [1, 99, 3]
+am.concat(arr1, arr2)      // Combines two arrays
+am.join(numbers, ", ")     // Joins array elements into a string
 ```
 
 ### File Namespace
@@ -598,6 +597,33 @@ Current limitations of the Rusty language:
 3. Method calls are not optimized for chaining (each call returns a new object)
 4. No exception handling mechanism
 5. Limited standard library compared to mature languages
-6. Array creation requires using `Array().create()` rather than a direct `Array()` call
 
 Despite these limitations, Rusty provides a clean, intuitive way to write organized, object-oriented code.
+
+### Array Handling
+
+Rusty provides JavaScript-style array creation and manipulation:
+
+```rusty
+// Creating arrays with literals (recommended)
+var empty = [];                  // Empty array
+var numbers = [1, 2, 3, 4, 5];   // Array of numbers
+var mixed = ["hello", 42, true]; // Mixed types
+var nested = [[1, 2], [3, 4]];   // Nested arrays
+
+// Alternatively, create arrays with the Array constructor
+var empty2 = Array();            // Empty array
+var numbers2 = Array(1, 2, 3);   // Array with values [1, 2, 3]
+
+// Using static methods on the Array namespace (exactly like JavaScript)
+Array.length(numbers);           // Returns 5
+Array.push(numbers, 6);          // Returns [1, 2, 3, 4, 5, 6]
+Array.pop(numbers);              // Removes and returns the last element
+Array.get(numbers, 0);           // Returns 1 (first element)
+Array.set(numbers, 1, 99);       // Returns [1, 99, 3, 4, 5]
+Array.concat([1, 2], [3, 4]);    // Returns [1, 2, 3, 4]
+Array.join(numbers, ", ");       // Joins array elements into a string
+
+// Direct use with literals
+Array.length([1, 2, 3]);         // Returns 3
+```

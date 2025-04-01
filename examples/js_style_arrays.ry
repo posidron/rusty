@@ -1,0 +1,59 @@
+// JavaScript-style Array Demo
+// Shows how to create and work with arrays like in JavaScript
+
+print "=== JavaScript-style Array Demo ===";
+
+// String namespace for formatting
+var str = String();
+
+print "\n== Creating Arrays ==";
+
+// Empty array with literal syntax
+var empty = [];
+print "Empty array via []: " + str.string(empty);
+
+// Empty array with constructor
+var empty2 = Array();
+print "Empty array via Array(): " + str.string(empty2);
+
+// Array with values - literal syntax
+var numbers = [1, 2, 3, 4, 5];
+print "Numbers array via []: " + str.string(numbers);
+
+// Array with values - constructor syntax
+var numbers2 = Array(1, 2, 3, 4, 5);
+print "Numbers array via Array(): " + str.string(numbers2);
+
+// Mixed types array
+var mixed = ["hello", 42, true, nil];
+print "Mixed array: " + str.string(mixed);
+
+print "\n== Array Methods ==";
+
+// Get array length
+print "Array.length([1,2,3]): " + str.string(Array.length([1, 2, 3]));
+
+// Get element at index
+print "Array.get(numbers, 2): " + str.string(Array.get(numbers, 2));
+
+// Push element to array
+var extended = Array.push(numbers, 6);
+print "After Array.push: " + str.string(extended);
+
+// Pop element from array
+var popped = Array.pop(extended);
+print "Pop result: " + str.string(popped);
+print "After Array.pop: " + str.string(Array.pop(extended));
+
+// Set element at index
+var modified = Array.set(numbers, 1, 99);
+print "After Array.set(numbers, 1, 99): " + str.string(modified);
+
+// Join array elements
+print "Array.join(numbers, ', '): " + Array.join(numbers, ", ");
+
+// Concat arrays
+var combined = Array.concat([1, 2], [3, 4]);
+print "Array.concat result: " + str.string(combined);
+
+print "\n=== Demo Complete ===";

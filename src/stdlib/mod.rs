@@ -17,7 +17,6 @@ pub struct StdLib {
 
 // Global namespace constants - accessible from the getter functions
 static mut MATH_NAMESPACE: Option<Value> = None;
-static mut ARRAY_NAMESPACE: Option<Value> = None;
 static mut STRING_NAMESPACE: Option<Value> = None;
 static mut FILE_NAMESPACE: Option<Value> = None;
 static mut TIME_NAMESPACE: Option<Value> = None;
@@ -35,14 +34,9 @@ fn get_math_namespace(_args: Vec<Value>) -> Result<Value, String> {
     }
 }
 
-fn get_array_namespace(_args: Vec<Value>) -> Result<Value, String> {
-    unsafe {
-        if let Some(ref ns) = ARRAY_NAMESPACE {
-            Ok(ns.clone())
-        } else {
-            Err("Array namespace not initialized".to_string())
-        }
-    }
+fn get_array_namespace(args: Vec<Value>) -> Result<Value, String> {
+    // Always create and return an array with the given arguments
+    return array::array(args);
 }
 
 fn get_string_namespace(_args: Vec<Value>) -> Result<Value, String> {
@@ -182,76 +176,18 @@ impl StdLib {
 
     /// Create an Array namespace with all array functions
     fn register_array_namespace(&mut self) {
-        let mut array_namespace = Value::new_namespace("Array");
-
-        // Create Array namespace functions
-        let array_fn = Rc::new(NativeFunction {
-            name: "Array.create".to_string(),
-            arity: 0,
-            function: array::array,
-        });
-
-        let length_fn = Rc::new(NativeFunction {
-            name: "Array.length".to_string(),
-            arity: 1,
-            function: array::length,
-        });
-
-        let push_fn = Rc::new(NativeFunction {
-            name: "Array.push".to_string(),
-            arity: 2,
-            function: array::push,
-        });
-
-        let pop_fn = Rc::new(NativeFunction {
-            name: "Array.pop".to_string(),
-            arity: 1,
-            function: array::pop,
-        });
-
-        let get_fn = Rc::new(NativeFunction {
-            name: "Array.get".to_string(),
-            arity: 2,
-            function: array::get,
-        });
-
-        let set_fn = Rc::new(NativeFunction {
-            name: "Array.set".to_string(),
-            arity: 3,
-            function: array::set,
-        });
-
-        let concat_fn = Rc::new(NativeFunction {
-            name: "Array.concat".to_string(),
-            arity: 2,
-            function: array::concat,
-        });
-
-        let join_fn = Rc::new(NativeFunction {
-            name: "Array.join".to_string(),
-            arity: 2,
-            function: array::join,
-        });
-
-        // Add methods to Array namespace
-        if let Value::Namespace(_, props) = &mut array_namespace {
-            props.insert("create".to_string(), Value::NativeFunction(array_fn));
-            props.insert("length".to_string(), Value::NativeFunction(length_fn));
-            props.insert("push".to_string(), Value::NativeFunction(push_fn));
-            props.insert("pop".to_string(), Value::NativeFunction(pop_fn));
-            props.insert("get".to_string(), Value::NativeFunction(get_fn));
-            props.insert("set".to_string(), Value::NativeFunction(set_fn));
-            props.insert("concat".to_string(), Value::NativeFunction(concat_fn));
-            props.insert("join".to_string(), Value::NativeFunction(join_fn));
-        }
-
-        // Store the namespace in the global variable
-        unsafe {
-            ARRAY_NAMESPACE = Some(array_namespace);
-        }
-
-        // Register the Array namespace accessor function
+        // Register the Array constructor function (creates arrays)
         self.register("Array", 0, get_array_namespace);
+
+        // Register all array methods as static methods on Array namespace
+        self.register("Array.create", 0, array::array);
+        self.register("Array.length", 1, array::length);
+        self.register("Array.push", 2, array::push);
+        self.register("Array.pop", 1, array::pop);
+        self.register("Array.get", 2, array::get);
+        self.register("Array.set", 3, array::set);
+        self.register("Array.concat", 2, array::concat);
+        self.register("Array.join", 2, array::join);
     }
 
     /// Create a String namespace with string utility functions

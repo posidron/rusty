@@ -1,0 +1,42 @@
+// Array Literal Demo
+// Demonstrates JavaScript-like array syntax in Rusty
+
+print "=== Array Literal Demo ===";
+
+// Get string namespace for formatting
+var str = String();
+var am = ArrayMethods();
+
+print "\n== Creating Arrays with Literals ==";
+
+// Empty array
+var empty = [];
+print "Empty array: " + str.string(empty);
+
+// Array with numbers
+var numbers = [1, 2, 3, 4, 5];
+print "Numbers array: " + str.string(numbers);
+
+// Array with mixed types
+var mixed = ["hello", 42, true, nil];
+print "Mixed array: " + str.string(mixed);
+
+// Nested arrays
+var nested = [[1, 2], [3, 4], [5, 6]];
+print "Nested array: " + str.string(nested);
+
+print "\n== Array Methods with Literals ==";
+
+// Using array methods with literals
+print "Length of [1,2,3]: " + str.string(am.length([1, 2, 3]));
+
+// Array operations
+print "Get element at index 1: " + str.string(am.get(numbers, 1));
+var extended = am.push(numbers, 6);
+print "After pushing 6: " + str.string(extended);
+
+// Array method chaining example
+var result = am.push(am.concat([1, 2], [3, 4]), 5);
+print "Chained operations result: " + str.string(result);
+
+print "\n=== Demo Complete ===";

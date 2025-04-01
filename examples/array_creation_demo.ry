@@ -1,0 +1,53 @@
+// Array Creation Demo
+// Demonstrates the improved Array creation syntax
+
+print "=== Array Creation Demo ===";
+
+// Get required namespaces
+var str = String();
+var am = ArrayMethods();  // Get the Array namespace for methods
+
+print "\n== Creating Arrays ==";
+
+// Creating an empty array
+print "Creating an empty array with Array():";
+var empty = Array();
+print "Empty array: " + str.string(empty);
+
+// Creating array with values directly
+print "\nCreating array with values directly:";
+var numbers = Array(1, 2, 3, 4, 5);
+print "Numbers array: " + str.string(numbers);
+
+// Creating arrays with mixed types
+print "\nCreating array with mixed types:";
+var mixed = Array("hello", 42, true, nil);
+print "Mixed array: " + str.string(mixed);
+
+// Array operations using methods
+print "\n== Operations on Arrays ==";
+
+// Get length
+print "Length of numbers array: " + str.string(am.length(numbers));
+
+// Get element
+print "Element at index 2: " + str.string(am.get(numbers, 2));
+
+// Push to array
+var extended = am.push(numbers, 6);
+print "After pushing 6: " + str.string(extended);
+
+// Pop from array
+var popped = am.pop(extended);
+print "Popped value: " + str.string(popped);
+print "After popping: " + str.string(am.set(extended, 0, 99));
+
+// Create and join array
+var fruits = Array("apple", "banana", "cherry");
+print "Fruits joined: " + am.join(fruits, " & ");
+
+// Combining arrays
+var combined = am.concat(numbers, fruits);
+print "Combined arrays: " + str.string(combined);
+
+print "\n=== Demo Complete ===";

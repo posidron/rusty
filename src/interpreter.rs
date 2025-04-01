@@ -405,7 +405,11 @@ impl Interpreter {
                     self.environment = *self.environment.enclosing.take().unwrap();
                     Ok(return_value)
                 } else if let Value::NativeFunction(function) = &callee_value {
-                    if function.arity != 0 && args.len() != function.arity {
+                    // Special handling for Array() constructor to allow variable arguments
+                    let is_array_constructor = function.name == "Array";
+
+                    // Only check arity if it's not the Array constructor and arity is not 0
+                    if !is_array_constructor && function.arity != 0 && args.len() != function.arity {
                         return Err(RuntimeError::Error(format!(
                             "Expected {} arguments but got {}.",
                             function.arity,
@@ -422,6 +426,17 @@ impl Interpreter {
                 }
             },
             Expr::Get(object, name) => {
+                // Special case for Array.method static method access (when used without immediate call)
+                if let Expr::Variable(var_name) = &**object {
+                    if var_name.lexeme == "Array" {
+                        let method_name = format!("Array.{}", name.lexeme);
+                        if let Some(method) = self.environment.get(&method_name) {
+                            return Ok(method);
+                        }
+                    }
+                }
+
+                // Regular property access
                 let object_value = self.evaluate(object)?;
 
                 // Handle property access for different types
@@ -449,6 +464,35 @@ impl Interpreter {
                 }
             },
             Expr::Method(object, name, arguments) => {
+                // Special case for Array.method() static method calls
+                if let Expr::Variable(var_name) = &**object {
+                    if var_name.lexeme == "Array" {
+                        let method_name = format!("Array.{}", name.lexeme);
+                        if let Some(method) = self.environment.get(&method_name) {
+                            let mut args = Vec::new();
+                            for argument in arguments {
+                                args.push(self.evaluate(argument)?);
+                            }
+
+                            if let Value::NativeFunction(function) = &method {
+                                if function.arity != 0 && args.len() != function.arity {
+                                    return Err(RuntimeError::Error(format!(
+                                        "Expected {} arguments but got {}.",
+                                        function.arity,
+                                        args.len()
+                                    )));
+                                }
+
+                                match (function.function)(args) {
+                                    Ok(value) => return Ok(value),
+                                    Err(message) => return Err(RuntimeError::Error(message)),
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Regular method call on objects
                 let object_value = self.evaluate(object)?;
                 let mut args = Vec::new();
                 for argument in arguments {
@@ -462,7 +506,11 @@ impl Interpreter {
                         if let Some(method) = object_value.get_property(name_str) {
                             if method.is_callable() {
                                 if let Value::NativeFunction(function) = &method {
-                                    if function.arity != 0 && args.len() != function.arity {
+                                    // Special handling for Array() constructor to allow variable arguments
+                                    let is_array_constructor = function.name == "Array";
+
+                                    // Only check arity if it's not the Array constructor and arity is not 0
+                                    if !is_array_constructor && function.arity != 0 && args.len() != function.arity {
                                         return Err(RuntimeError::Error(format!(
                                             "Expected {} arguments but got {}.",
                                             function.arity,
