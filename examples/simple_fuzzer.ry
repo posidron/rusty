@@ -1,0 +1,97 @@
+// Minimal Text Fuzzer Example
+// Uses string manipulation functions to fuzz a text file
+
+// Configuration
+var input_file = "input.txt";
+var output_file = "fuzzed.txt";
+
+// Read the input file
+var text = file(input_file, "r");
+print "Read " + as_string(length(text)) + " bytes from " + input_file;
+
+// Apply random mutations
+var i = 0;
+var count = 5; // Number of mutations
+while (i < count) {
+    // Choose a random position
+    var pos = floor(random() * length(text));
+
+    // Pick a mutation type (0-2)
+    var mutation = floor(random() * 3);
+
+    if (mutation == 0) {
+        // Replace a character
+        text = set(text, pos, "@");
+        print "Replaced character at position " + as_string(pos);
+    }
+    else if (mutation == 1) {
+        // Delete a character - only if text is long enough
+        if (length(text) > 1) {
+            var before = "";
+            var after = "";
+
+            // Get text before mutation point
+            if (pos > 0) {
+                var j = 0;
+                before = "";
+                while (j < pos) {
+                    before = before + get(text, j);
+                    j = j + 1;
+                }
+            }
+
+            // Get text after mutation point
+            if (pos < length(text) - 1) {
+                var j = pos + 1;
+                after = "";
+                while (j < length(text)) {
+                    after = after + get(text, j);
+                    j = j + 1;
+                }
+            }
+
+            text = before + after;
+            print "Deleted character at position " + as_string(pos);
+        }
+    }
+    else {
+        // Insert a character
+        var special = "!@#$%^&*()";
+        var special_char = get(special, floor(random() * length(special)));
+
+        var before = "";
+        var after = "";
+
+        // Get text before insertion point
+        if (pos > 0) {
+            var j = 0;
+            before = "";
+            while (j < pos) {
+                before = before + get(text, j);
+                j = j + 1;
+            }
+        }
+
+        // Get text after insertion point
+        var j = pos;
+        after = "";
+        while (j < length(text)) {
+            after = after + get(text, j);
+            j = j + 1;
+        }
+
+        text = before + special_char + after;
+        print "Inserted '" + special_char + "' at position " + as_string(pos);
+    }
+
+    i = i + 1;
+}
+
+// Write the fuzzed output
+if (file(output_file, "w", text)) {
+    print "Wrote " + as_string(length(text)) + " bytes to " + output_file;
+} else {
+    print "Failed to write to " + output_file;
+}
+
+print "Fuzzing completed.";

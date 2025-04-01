@@ -1,0 +1,16 @@
+[project]
+name = "matrix-benchmark"
+version = "0.1.0"
+description = "Matrix multiplication benchmark comparing Python and Rusty"
+authors = [
+    {name = "Benchmarking Team"}
+]
+readme = "README.md"
+requires-python = "^3.9"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

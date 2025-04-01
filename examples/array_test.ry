@@ -1,0 +1,40 @@
+// Minimal Array Function Test
+
+// Create an array
+var arr = array(1, 2, 3, 4, 5);
+print "Original array: " + as_string(arr);
+print "Array length: " + as_string(length(arr));
+
+// Test get
+var element = get(arr, 2);
+print "Element at index 2: " + as_string(element);
+
+// Test set
+var modified = set(arr, 2, 99);
+print "After set: " + as_string(modified);
+
+// Test index (same as get)
+var element2 = index(arr, 1);
+print "Element at index 1: " + as_string(element2);
+
+// Test index_set (same as set)
+var modified2 = index_set(arr, 0, 42);
+print "After index_set: " + as_string(modified2);
+
+// Test push
+var extended = push(arr, 6);
+print "After push: " + as_string(extended);
+
+// Test pop
+var last = pop(extended);
+print "Popped value: " + as_string(last);
+print "After pop: " + as_string(pop(extended));
+
+// Test concat
+var arr2 = array(8, 9, 10);
+var combined = concat(arr, arr2);
+print "Concatenated arrays: " + as_string(combined);
+
+// Test join
+var joined = join(arr, ", ");
+print "Joined array: " + joined;

@@ -93,8 +93,11 @@ impl StdLib {
         self.register("pop", 1, array::pop);
         self.register("get", 2, array::get);
         self.register("set", 3, array::set);
+        self.register("index", 2, array::index);
+        self.register("index_set", 3, array::index_set);
         self.register("concat", 2, array::concat);
         self.register("join", 2, array::join);
+        self.register_variadic("slice", array::slice);
     }
 
     /// Register all JSON-related functions

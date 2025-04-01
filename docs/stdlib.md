@@ -66,11 +66,14 @@ var success = file("data.txt", "d");  // Returns true/false
 | Function | Arguments | Description | Example |
 |----------|-----------|-------------|---------|
 | `array([items...])` | Any number of values | Creates a new array with the provided items | `var arr = array(1, 2, 3);` |
-| `length(array)` | One array | Returns the number of elements in the array | `var len = length(arr);` |
+| `length(array)` | One array or string | Returns the number of elements in the array or characters in the string | `var len = length(arr);` |
 | `push(array, item)` | Array and any value | Adds an item to the end of the array and returns the new array | `var new_arr = push(arr, 4);` |
 | `pop(array)` | One array | Removes and returns the last item from the array | `var last = pop(arr);` |
-| `get(array, index)` | Array and number | Returns the item at the specified index | `var first = get(arr, 0);` |
-| `set(array, index, value)` | Array, number, and any value | Returns a new array with the item at the specified index replaced | `var updated = set(arr, 1, 99);` |
+| `get(array, index)` | Array/string and number | Returns the item at the specified index | `var first = get(arr, 0);` |
+| `set(array, index, value)` | Array/string, number, and any value | Returns a new array/string with the item at the specified index replaced | `var updated = set(arr, 1, 99);` |
+| `index(array, index)` | Array/string and number | Bracket notation access (alternative to get) | `var first = index(arr, 0);` |
+| `index_set(array, index, value)` | Array/string, number, and any value | Bracket notation assignment (alternative to set) | `var updated = index_set(arr, 1, 99);` |
+| `slice(array, start, [length])` | Array/string, number, optional number | Returns a portion of the array/string from start index with given length | `var part = slice(arr, 1, 2);` |
 | `concat(array1, array2)` | Two arrays | Returns a new array with the contents of both arrays | `var combined = concat(arr1, arr2);` |
 | `join(array, separator)` | Array and string | Joins array elements into a string with the specified separator | `var str = join(arr, ", ");` |
 
@@ -84,9 +87,29 @@ var count = length(numbers);  // 5
 
 // Access elements
 var first = get(numbers, 0);  // 1
+// or using index function (simulates bracket notation)
+var first = index(numbers, 0);  // 1
+
+// Access string characters
+var greeting = "hello";
+var second_char = get(greeting, 1);  // "e"
+// or using index function
+var second_char = index(greeting, 1);  // "e"
 
 // Modify array
 var modified = set(numbers, 2, 99);  // [1, 2, 99, 4, 5]
+// or using index_set function
+var modified = index_set(numbers, 2, 99);  // [1, 2, 99, 4, 5]
+
+// Modify string
+var greeting = "hello";
+var new_greeting = set(greeting, 1, "a");  // "hallo"
+// or using index_set function
+var new_greeting = index_set(greeting, 1, "a");  // "hallo"
+
+// Slice array or string
+var part = slice(numbers, 1, 3);  // [2, 3, 4]
+var substr = slice("hello", 1, 3);  // "ell"
 
 // Add elements
 var extended = push(numbers, 6);  // [1, 2, 3, 4, 5, 6]

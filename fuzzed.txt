@@ -1,0 +1,5 @@
+Hello, this is a sample text file for fuzzing!
+It contains multiple lines of te]t.
+We can test various mutation strategies on this con<en*.
+The fuzzer will generate differ?nt v>riations of this$text.
+Let's@see wha( interesting mutations it>can create!
