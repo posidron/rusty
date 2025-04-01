@@ -1,9 +1,0 @@
-// Simple JSON test
-
-// Test simple value
-var num = json_parse("42");
-print num;
-
-// Test basic string
-var str = json_parse("\"hello\"");
-print str;

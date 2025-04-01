@@ -1,0 +1,110 @@
+// Full Object-Oriented Demo for Rusty
+// Demonstrates using all namespaces with the OOP approach
+
+print "=== Rusty Object-Oriented Demo ===";
+
+// Math Namespace Demo
+print "\n== Math Namespace ==";
+var math = Math();
+print "PI = " + String().string(math.PI);
+print "E = " + String().string(math.E);
+print "abs(-42) = " + String().string(math.abs(-42));
+print "round(3.7) = " + String().string(math.round(3.7));
+print "random() = " + String().string(math.random());
+print "random_range(1, 10) = " + String().string(math.random_range(1, 10));
+
+// String Namespace Demo
+print "\n== String Namespace ==";
+var str = String();
+var text = "Hello, Rusty World!";
+print "Original: " + text;
+print "Length: " + String().string(str.length(text));
+print "Uppercase: " + str.upper(text);
+print "Lowercase: " + str.lower(text);
+print "Number to string: " + str.string(42.5);
+
+// Array Namespace Demo
+print "\n== Array Namespace ==";
+var arr = Array();
+var numbers = arr.create();  // Use create() to initialize an array
+print "Created empty array";
+numbers = arr.push(numbers, 10);
+numbers = arr.push(numbers, 20);
+numbers = arr.push(numbers, 30);
+print "Array after push: " + str.string(numbers);
+print "Length: " + str.string(arr.length(numbers));
+print "First element: " + str.string(arr.get(numbers, 0));
+var modified = arr.set(numbers, 1, 25);
+print "After setting index 1 to 25: " + str.string(modified);
+var joined = arr.join(numbers, " | ");
+print "Joined: " + joined;
+
+// Time Namespace Demo
+print "\n== Time Namespace ==";
+var time = Time();
+print "Current time: " + str.string(time.now());
+
+// File Namespace Demo
+print "\n== File Namespace ==";
+var file = File();
+var test_file = "oop_test.txt";
+
+// Write to file
+file.write(test_file, "This is a test file created with the File namespace.");
+print "File written: " + str.string(file.exists(test_file));
+
+// Read from file
+var content = file.read(test_file);
+print "File content: " + content;
+
+// Delete file
+file.delete(test_file);
+print "File deleted: " + str.string(!file.exists(test_file));
+
+// JSON Namespace Demo
+print "\n== JSON Namespace ==";
+var json = JSON();
+
+// Create a person object
+var person = arr.create();
+var nameProperty = arr.create();
+nameProperty = arr.push(nameProperty, "name");
+nameProperty = arr.push(nameProperty, "Alice");
+person = arr.push(person, nameProperty);
+
+var ageProperty = arr.create();
+ageProperty = arr.push(ageProperty, "age");
+ageProperty = arr.push(ageProperty, 30);
+person = arr.push(person, ageProperty);
+
+// Convert to JSON
+var jsonStr = json.stringify(person);
+print "JSON string: " + jsonStr;
+
+// Parse JSON
+var parsed = json.parse(jsonStr);
+print "Parsed name: " + str.string(arr.get(arr.get(parsed, 0), 1));
+print "Parsed age: " + str.string(arr.get(arr.get(parsed, 1), 1));
+
+// Regex Namespace Demo
+print "\n== Regex Namespace ==";
+var regex = Regex();
+
+// Create a pattern
+var pattern = regex.new("[0-9]+");
+print "Pattern created: [0-9]+";
+
+// Test the pattern
+print "Test '123': " + str.string(regex.test(pattern, "123"));
+print "Test 'abc': " + str.string(regex.test(pattern, "abc"));
+
+// Find matches
+var text_with_numbers = "Order #12345 contains 42 items for $9.99";
+var matches = regex.match(pattern, text_with_numbers);
+print "Matches found: " + str.string(matches);
+
+// Replace text
+var replaced = regex.replace(pattern, text_with_numbers, "X");
+print "After replacement: " + replaced;
+
+print "\n=== Demo Complete ===";

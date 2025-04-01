@@ -1,0 +1,47 @@
+// Math Namespace Example
+// Demonstrates all methods and constants in the Math namespace
+
+print "=== Math Namespace Example ===";
+
+// Create Math namespace
+var math = Math();
+
+// Constants
+print "\n== Constants ==";
+print "PI = " + String().string(math.PI) + " (π)";
+print "E = " + String().string(math.E) + " (Euler's number)";
+
+// Basic operations
+print "\n== Basic Operations ==";
+print "abs(-42) = " + String().string(math.abs(-42));
+print "min(5, 10) = " + String().string(math.min(5, 10));
+print "max(5, 10) = " + String().string(math.max(5, 10));
+
+// Rounding operations
+print "\n== Rounding Operations ==";
+var decimal = 3.14159;
+print "Original number: " + String().string(decimal);
+print "round(" + String().string(decimal) + ") = " + String().string(math.round(decimal));
+print "floor(" + String().string(decimal) + ") = " + String().string(math.floor(decimal));
+print "ceil(" + String().string(decimal) + ") = " + String().string(math.ceil(decimal));
+
+// Random numbers
+print "\n== Random Numbers ==";
+print "random() = " + String().string(math.random());
+print "random() = " + String().string(math.random());
+print "random() = " + String().string(math.random());
+print "random_range(1, 10) = " + String().string(math.random_range(1, 10));
+print "random_range(1, 10) = " + String().string(math.random_range(1, 10));
+print "random_range(1, 10) = " + String().string(math.random_range(1, 10));
+
+// Practical example: computing area of a circle
+print "\n== Practical Example: Circle Area ==";
+fun circle_area(radius) {
+    return math.PI * radius * radius;
+}
+
+var radius = 5;
+print "Area of circle with radius " + String().string(radius) + " = " +
+      String().string(math.round(circle_area(radius) * 100) / 100);
+
+print "\n=== Example Complete ===";

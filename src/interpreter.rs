@@ -12,6 +12,8 @@ pub enum Value {
     Function(Rc<Function>),
     NativeFunction(Rc<NativeFunction>),
     Array(Vec<Value>),
+    Object(HashMap<String, Value>),
+    Namespace(String, HashMap<String, Value>),
     Nil,
 }
 
@@ -258,39 +260,72 @@ impl Interpreter {
                 let left = self.evaluate(left)?;
                 let right = self.evaluate(right)?;
 
-                match (left, &operator.token_type, right) {
-                    // Arithmetic operations
-                    (Value::Number(a), TokenType::Plus, Value::Number(b)) => Ok(Value::Number(a + b)),
-                    (Value::Number(a), TokenType::Minus, Value::Number(b)) => Ok(Value::Number(a - b)),
-                    (Value::Number(a), TokenType::Star, Value::Number(b)) => Ok(Value::Number(a * b)),
-                    (Value::Number(a), TokenType::Slash, Value::Number(b)) => {
-                        if b == 0.0 {
-                            Err(RuntimeError::Error("Division by zero.".to_string()))
-                        } else {
-                            Ok(Value::Number(a / b))
+                match operator.token_type {
+                    TokenType::Minus => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a - b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
                         }
                     }
-
-                    // String concatenation
-                    (Value::String(a), TokenType::Plus, Value::String(b)) => Ok(Value::String(a + &b)),
-
-                    // Comparisons
-                    (Value::Number(a), TokenType::Greater, Value::Number(b)) => Ok(Value::Boolean(a > b)),
-                    (Value::Number(a), TokenType::GreaterEqual, Value::Number(b)) => Ok(Value::Boolean(a >= b)),
-                    (Value::Number(a), TokenType::Less, Value::Number(b)) => Ok(Value::Boolean(a < b)),
-                    (Value::Number(a), TokenType::LessEqual, Value::Number(b)) => Ok(Value::Boolean(a <= b)),
-
-                    // Equality
-                    (a, TokenType::EqualEqual, b) => Ok(Value::Boolean(self.is_equal(&a, &b))),
-                    (a, TokenType::BangEqual, b) => Ok(Value::Boolean(!self.is_equal(&a, &b))),
-
-                    _ => Err(RuntimeError::Error("Invalid binary operation.".to_string())),
+                    TokenType::Slash => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => {
+                                if b == 0.0 {
+                                    Err(RuntimeError::Error("Division by zero.".to_string()))
+                                } else {
+                                    Ok(Value::Number(a / b))
+                                }
+                            }
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::Star => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::Plus => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)),
+                            (Value::String(a), Value::String(b)) => Ok(Value::String(a + &b)),
+                            _ => Err(RuntimeError::Error("Operands must be two numbers or two strings.".to_string())),
+                        }
+                    }
+                    TokenType::Greater => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a > b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::GreaterEqual => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a >= b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::Less => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a < b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::LessEqual => {
+                        match (left, right) {
+                            (Value::Number(a), Value::Number(b)) => Ok(Value::Boolean(a <= b)),
+                            _ => Err(RuntimeError::Error("Operands must be numbers.".to_string())),
+                        }
+                    }
+                    TokenType::BangEqual => Ok(Value::Boolean(left != right)),
+                    TokenType::EqualEqual => Ok(Value::Boolean(left == right)),
+                    _ => Err(RuntimeError::Error("Invalid binary operator.".to_string())),
                 }
             }
             Expr::Variable(name) => {
-                match self.environment.get(&name.lexeme) {
-                    Some(value) => Ok(value),
-                    None => Err(RuntimeError::Error(format!("Undefined variable '{}'.", name.lexeme))),
+                if let Some(value) = self.environment.get(&name.lexeme) {
+                    Ok(value)
+                } else {
+                    Err(RuntimeError::Error(format!("Undefined variable '{}'.", name.lexeme)))
                 }
             }
             Expr::Assign(name, value) => {
@@ -301,74 +336,204 @@ impl Interpreter {
                     Err(RuntimeError::Error(format!("Undefined variable '{}'.", name.lexeme)))
                 }
             }
+            Expr::Logical(left, operator, right) => {
+                let left = self.evaluate(left)?;
+
+                match operator.token_type {
+                    TokenType::Or => {
+                        if self.is_truthy(&left) {
+                            return Ok(left);
+                        }
+                    }
+                    TokenType::And => {
+                        if !self.is_truthy(&left) {
+                            return Ok(left);
+                        }
+                    }
+                    _ => return Err(RuntimeError::Error("Invalid logical operator.".to_string())),
+                }
+
+                self.evaluate(right)
+            }
             Expr::Call(callee, _paren, arguments) => {
                 let callee_value = self.evaluate(callee)?;
-
-                let mut argument_values = Vec::new();
+                let mut args = Vec::new();
                 for argument in arguments {
-                    argument_values.push(self.evaluate(argument)?);
+                    args.push(self.evaluate(argument)?);
                 }
 
-                match callee_value {
-                    Value::Function(function) => self.call_function(&function, argument_values),
-                    Value::NativeFunction(function) => {
-                        // Special case for variadic functions that can take any number of arguments
-                        if (function.name == "file" && (argument_values.len() == 2 || argument_values.len() == 3)) ||
-                           (function.name == "array") {
-                            match (function.function)(argument_values) {
-                                Ok(value) => Ok(value),
-                                Err(message) => Err(RuntimeError::Error(message)),
-                            }
-                        } else if argument_values.len() != function.arity {
-                            return Err(RuntimeError::Error(format!(
-                                "Expected {} arguments but got {}.",
-                                function.arity,
-                                argument_values.len()
-                            )));
-                        } else {
-                            match (function.function)(argument_values) {
-                                Ok(value) => Ok(value),
-                                Err(message) => Err(RuntimeError::Error(message)),
+                if !callee_value.is_callable() {
+                    return Err(RuntimeError::Error(format!("Can only call functions and classes.")));
+                }
+
+                if let Value::Function(function) = &callee_value {
+                    if args.len() != function.params.len() {
+                        return Err(RuntimeError::Error(format!(
+                            "Expected {} arguments but got {}.",
+                            function.params.len(),
+                            args.len()
+                        )));
+                    }
+
+                    // Create a new environment for the function call
+                    let previous = self.environment.clone();
+                    self.environment = Environment::new(Some(Box::new(previous)));
+
+                    // Bind arguments to parameters
+                    for (param, arg) in function.params.iter().zip(args.iter()) {
+                        self.environment.define(param.lexeme.clone(), arg.clone());
+                    }
+
+                    // Execute function body
+                    let mut return_value = Value::Nil;
+                    for stmt in &function.body {
+                        match self.execute(stmt) {
+                            Ok(_) => {},
+                            Err(RuntimeError::Return(value)) => {
+                                return_value = value;
+                                break;
+                            },
+                            Err(e) => {
+                                // Restore environment and propagate error
+                                self.environment = *self.environment.enclosing.take().unwrap();
+                                return Err(e);
                             }
                         }
-                    },
-                    _ => Err(RuntimeError::Error("Can only call functions.".to_string())),
+                    }
+
+                    // Restore environment
+                    self.environment = *self.environment.enclosing.take().unwrap();
+                    Ok(return_value)
+                } else if let Value::NativeFunction(function) = &callee_value {
+                    if function.arity != 0 && args.len() != function.arity {
+                        return Err(RuntimeError::Error(format!(
+                            "Expected {} arguments but got {}.",
+                            function.arity,
+                            args.len()
+                        )));
+                    }
+
+                    match (function.function)(args) {
+                        Ok(value) => Ok(value),
+                        Err(message) => Err(RuntimeError::Error(message)),
+                    }
+                } else {
+                    Err(RuntimeError::Error("Can only call functions and classes.".to_string()))
                 }
-            }
+            },
+            Expr::Get(object, name) => {
+                let object_value = self.evaluate(object)?;
+
+                // Handle property access for different types
+                match &object_value {
+                    Value::Object(_) | Value::Namespace(_, _) => {
+                        if let Some(property) = object_value.get_property(&name.lexeme) {
+                            Ok(property)
+                        } else {
+                            Err(RuntimeError::Error(format!("Property '{}' not found.", name.lexeme)))
+                        }
+                    },
+                    Value::Array(elements) => {
+                        match name.lexeme.as_str() {
+                            "length" => Ok(Value::Number(elements.len() as f64)),
+                            _ => Err(RuntimeError::Error(format!("Array has no property '{}'.", name.lexeme)))
+                        }
+                    },
+                    Value::String(s) => {
+                        match name.lexeme.as_str() {
+                            "length" => Ok(Value::Number(s.len() as f64)),
+                            _ => Err(RuntimeError::Error(format!("String has no property '{}'.", name.lexeme)))
+                        }
+                    },
+                    _ => Err(RuntimeError::Error(format!("Cannot access properties of non-object value.")))
+                }
+            },
+            Expr::Method(object, name, arguments) => {
+                let object_value = self.evaluate(object)?;
+                let mut args = Vec::new();
+                for argument in arguments {
+                    args.push(self.evaluate(argument)?);
+                }
+
+                // Handle method calls for different types
+                match &object_value {
+                    Value::Object(_) | Value::Namespace(_, _) => {
+                        let name_str = &name.lexeme;
+                        if let Some(method) = object_value.get_property(name_str) {
+                            if method.is_callable() {
+                                if let Value::NativeFunction(function) = &method {
+                                    if function.arity != 0 && args.len() != function.arity {
+                                        return Err(RuntimeError::Error(format!(
+                                            "Expected {} arguments but got {}.",
+                                            function.arity,
+                                            args.len()
+                                        )));
+                                    }
+
+                                    match (function.function)(args) {
+                                        Ok(value) => Ok(value),
+                                        Err(message) => Err(RuntimeError::Error(message)),
+                                    }
+                                } else if let Value::Function(function) = &method {
+                                    // Similar implementation as for regular function calls
+                                    if args.len() != function.params.len() {
+                                        return Err(RuntimeError::Error(format!(
+                                            "Expected {} arguments but got {}.",
+                                            function.params.len(),
+                                            args.len()
+                                        )));
+                                    }
+
+                                    // Create a new environment for the function call
+                                    let previous = self.environment.clone();
+                                    self.environment = Environment::new(Some(Box::new(previous)));
+
+                                    // Bind arguments to parameters
+                                    for (param, arg) in function.params.iter().zip(args.iter()) {
+                                        self.environment.define(param.lexeme.clone(), arg.clone());
+                                    }
+
+                                    // Execute function body
+                                    let mut return_value = Value::Nil;
+                                    for stmt in &function.body {
+                                        match self.execute(stmt) {
+                                            Ok(_) => {},
+                                            Err(RuntimeError::Return(value)) => {
+                                                return_value = value;
+                                                break;
+                                            },
+                                            Err(e) => {
+                                                // Restore environment and propagate error
+                                                self.environment = *self.environment.enclosing.take().unwrap();
+                                                return Err(e);
+                                            }
+                                        }
+                                    }
+
+                                    // Restore environment
+                                    self.environment = *self.environment.enclosing.take().unwrap();
+                                    Ok(return_value)
+                                } else {
+                                    Err(RuntimeError::Error("Method is not callable.".to_string()))
+                                }
+                            } else {
+                                Err(RuntimeError::Error(format!("Property '{}' is not a method.", name.lexeme)))
+                            }
+                        } else {
+                            Err(RuntimeError::Error(format!("Method '{}' not found.", name.lexeme)))
+                        }
+                    },
+                    _ => Err(RuntimeError::Error(format!("Cannot call methods on non-object value.")))
+                }
+            },
+            Expr::Array(elements) => {
+                let mut values = Vec::new();
+                for element in elements {
+                    values.push(self.evaluate(element)?);
+                }
+                Ok(Value::Array(values))
+            },
         }
-    }
-
-    fn call_function(&mut self, function: &Rc<Function>, arguments: Vec<Value>) -> Result<Value, RuntimeError> {
-        if arguments.len() != function.params.len() {
-            return Err(RuntimeError::Error(format!(
-                "Expected {} arguments but got {}.",
-                function.params.len(),
-                arguments.len()
-            )));
-        }
-
-        let previous_env = self.environment.clone();
-        self.environment = Environment::new(Some(Box::new(previous_env)));
-
-        for (param, arg) in function.params.iter().zip(arguments.iter()) {
-            self.environment.define(param.lexeme.clone(), arg.clone());
-        }
-
-        let result = match self.execute_block(&function.body) {
-            Ok(_) => Ok(Value::Nil),
-            Err(RuntimeError::Return(value)) => Ok(value),
-            Err(e) => Err(e),
-        };
-
-        self.environment = *self.environment.enclosing.take().unwrap();
-        result
-    }
-
-    fn execute_block(&mut self, statements: &[Stmt]) -> Result<(), RuntimeError> {
-        for statement in statements {
-            self.execute(statement)?;
-        }
-        Ok(())
     }
 
     fn is_truthy(&self, value: &Value) -> bool {
@@ -417,6 +582,73 @@ impl Interpreter {
                 result.push_str("]");
                 result
             },
+            Value::Object(properties) => {
+                let mut result = String::from("{");
+                for (i, (key, value)) in properties.iter().enumerate() {
+                    if i > 0 {
+                        result.push_str(", ");
+                    }
+                    result.push_str(&format!("{}: {}", key, self.stringify(value.clone())));
+                }
+                result.push_str("}");
+                result
+            },
+            Value::Namespace(ns_name, properties) => {
+                let mut result = String::new();
+                result.push_str("[Namespace: ");
+                result.push_str(&ns_name);
+                result.push_str(" {");
+
+                for (i, (key, _value)) in properties.iter().enumerate() {
+                    if i > 0 {
+                        result.push_str(", ");
+                    }
+                    result.push_str(key);
+                }
+
+                result.push_str("}]");
+                result
+            },
         }
+    }
+}
+
+impl Value {
+    // Helper method to check if a value is a callable function
+    pub fn is_callable(&self) -> bool {
+        matches!(self, Value::Function(_) | Value::NativeFunction(_))
+    }
+
+    // Helper method to get a property from an object or namespace
+    pub fn get_property(&self, name: &str) -> Option<Value> {
+        match self {
+            Value::Object(properties) | Value::Namespace(_, properties) => properties.get(name).cloned(),
+            _ => None,
+        }
+    }
+
+    // Helper method to set a property on an object
+    pub fn set_property(&mut self, name: &str, value: Value) -> Result<(), String> {
+        match self {
+            Value::Object(properties) => {
+                properties.insert(name.to_string(), value);
+                Ok(())
+            },
+            Value::Namespace(_, properties) => {
+                properties.insert(name.to_string(), value);
+                Ok(())
+            },
+            _ => Err(format!("Cannot set property '{}' on non-object value", name)),
+        }
+    }
+
+    // Create a new empty object
+    pub fn new_object() -> Self {
+        Value::Object(HashMap::new())
+    }
+
+    // Create a new namespace with given name
+    pub fn new_namespace(name: &str) -> Self {
+        Value::Namespace(name.to_string(), HashMap::new())
     }
 }

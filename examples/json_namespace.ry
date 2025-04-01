@@ -1,0 +1,134 @@
+// JSON Namespace Example
+// Demonstrates all methods in the JSON namespace
+
+print "=== JSON Namespace Example ===";
+
+// Create JSON namespace
+var json = JSON();
+var array_ns = Array();
+var string_ns = String();
+
+// JSON parsing
+print "\n== Parsing JSON ==";
+var json_string = '{"name":"John","age":30,"city":"New York"}';
+print "JSON string: " + json_string;
+
+var parsed = json.parse(json_string);
+print "Parsed JSON: " + string_ns.string(parsed);
+
+// Accessing parsed JSON data
+print "\n== Accessing JSON Data ==";
+// Each property is a pair [key, value] in the array
+var name_pair = array_ns.get(parsed, 0);
+var name_key = array_ns.get(name_pair, 0);
+var name_value = array_ns.get(name_pair, 1);
+
+var age_pair = array_ns.get(parsed, 1);
+var age_key = array_ns.get(age_pair, 0);
+var age_value = array_ns.get(age_pair, 1);
+
+print "Name: " + name_value;
+print "Age: " + string_ns.string(age_value);
+
+// JSON stringification
+print "\n== Stringifying JSON ==";
+// Create a person object
+var person = array_ns.create();
+
+// Add name property
+var name_prop = array_ns.create();
+name_prop = array_ns.push(name_prop, "name");
+name_prop = array_ns.push(name_prop, "Alice");
+person = array_ns.push(person, name_prop);
+
+// Add age property
+var age_prop = array_ns.create();
+age_prop = array_ns.push(age_prop, "age");
+age_prop = array_ns.push(age_prop, 25);
+person = array_ns.push(person, age_prop);
+
+// Add skills array
+var skills = array_ns.create();
+skills = array_ns.push(skills, "programming");
+skills = array_ns.push(skills, "design");
+skills = array_ns.push(skills, "communication");
+
+var skills_prop = array_ns.create();
+skills_prop = array_ns.push(skills_prop, "skills");
+skills_prop = array_ns.push(skills_prop, skills);
+person = array_ns.push(person, skills_prop);
+
+print "Person object: " + string_ns.string(person);
+var json_result = json.stringify(person);
+print "Stringified JSON: " + json_result;
+
+// Practical example: configuration manager
+print "\n== Practical Example: Configuration Manager ==";
+
+fun create_config_manager() {
+    var config = array_ns.create();
+
+    // Default configuration
+    var defaults = array_ns.create();
+
+    // Add theme property
+    var theme_prop = array_ns.create();
+    theme_prop = array_ns.push(theme_prop, "theme");
+    theme_prop = array_ns.push(theme_prop, "light");
+    defaults = array_ns.push(defaults, theme_prop);
+
+    // Add fontSize property
+    var fontSize_prop = array_ns.create();
+    fontSize_prop = array_ns.push(fontSize_prop, "fontSize");
+    fontSize_prop = array_ns.push(fontSize_prop, 12);
+    defaults = array_ns.push(defaults, fontSize_prop);
+
+    // Add defaults to config
+    var defaults_prop = array_ns.create();
+    defaults_prop = array_ns.push(defaults_prop, "defaults");
+    defaults_prop = array_ns.push(defaults_prop, defaults);
+    config = array_ns.push(config, defaults_prop);
+
+    return config;
+}
+
+fun save_config(config, file_path) {
+    var j = JSON();
+    var f = File();
+    var json_string = j.stringify(config);
+    return f.write(file_path, json_string);
+}
+
+fun load_config(file_path) {
+    var j = JSON();
+    var f = File();
+
+    if (!f.exists(file_path)) {
+        return nil;
+    }
+
+    var json_string = f.read(file_path);
+    return j.parse(json_string);
+}
+
+// Create a configuration
+var config = create_config_manager();
+print "Default config: " + json.stringify(config);
+
+// Save the configuration
+var config_file = "config.json";
+save_config(config, config_file);
+print "Configuration saved to " + config_file;
+
+// Load the configuration
+var loaded_config = load_config(config_file);
+print "Loaded config: " + json.stringify(loaded_config);
+
+// Clean up
+var f = File();
+if (f.exists(config_file)) {
+    f.delete(config_file);
+    print "Config file deleted";
+}
+
+print "\n=== Example Complete ===";

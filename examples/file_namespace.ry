@@ -1,0 +1,79 @@
+// File Namespace Example
+// Demonstrates all methods in the File namespace
+
+print "=== File Namespace Example ===";
+
+// Create File namespace
+var file = File();
+
+// Define a test file path
+var test_file = "file_namespace_test.txt";
+
+// Clean up any existing test file
+if (file.exists(test_file)) {
+    print "Existing test file found, deleting it...";
+    file.delete(test_file);
+}
+
+// File existence check
+print "\n== File Existence ==";
+print "File exists before creation: " + String().string(file.exists(test_file));
+
+// Writing to a file
+print "\n== Writing to a File ==";
+var content = "Hello from Rusty!\nThis is line 2.\nThis is line 3.";
+var write_success = file.write(test_file, content);
+print "Write success: " + String().string(write_success);
+print "File exists after creation: " + String().string(file.exists(test_file));
+
+// Reading from a file
+print "\n== Reading from a File ==";
+var read_content = file.read(test_file);
+print "File content:";
+print read_content;
+
+// Appending to a file
+print "\n== Appending to a File ==";
+var append_content = "\n\nThis content was appended!";
+var append_success = file.append(test_file, append_content);
+print "Append success: " + String().string(append_success);
+
+// Reading the updated content
+print "\n== Reading Updated Content ==";
+read_content = file.read(test_file);
+print "Updated file content:";
+print read_content;
+
+// Practical example: counting lines
+print "\n== Practical Example: Counting Lines ==";
+fun count_lines(file_path) {
+    if (!file.exists(file_path)) {
+        return 0;
+    }
+
+    var content = file.read(file_path);
+    var line_count = 1;  // Start at 1 for the first line
+    var i = 0;
+    var str = String();
+
+    while (i < str.length(content)) {
+        if (Array().get(content, i) == "\n") {
+            line_count = line_count + 1;
+        }
+        i = i + 1;
+    }
+
+    return line_count;
+}
+
+var lines = count_lines(test_file);
+print "File: " + test_file;
+print "Line count: " + String().string(lines);
+
+// Deleting a file
+print "\n== Deleting a File ==";
+var delete_success = file.delete(test_file);
+print "Delete success: " + String().string(delete_success);
+print "File exists after deletion: " + String().string(file.exists(test_file));
+
+print "\n=== Example Complete ===";

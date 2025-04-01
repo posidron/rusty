@@ -1,0 +1,94 @@
+// Time Namespace Example
+// Demonstrates all methods in the Time namespace
+
+print "=== Time Namespace Example ===";
+
+// Create Time namespace
+var time = Time();
+
+// Getting current time
+print "\n== Current Time ==";
+var now = time.now();
+print "Current timestamp (milliseconds since epoch): " + String().string(now);
+
+// Simple timing operations
+print "\n== Timing Operations ==";
+
+// Measure execution time
+var start = time.now();
+
+// Run a simple loop
+var sum = 0;
+var i = 0;
+while (i < 1000000) {
+    sum = sum + i;
+    i = i + 1;
+}
+
+var end = time.now();
+var duration = end - start;
+
+print "Sum computation result: " + String().string(sum);
+print "Computation took " + String().string(duration) + " milliseconds";
+
+// Practical example: simple stopwatch
+print "\n== Practical Example: Stopwatch ==";
+
+fun create_stopwatch() {
+    var stopwatch = Array().create();
+
+    // Start time (initially nil)
+    stopwatch = Array().push(stopwatch, nil);
+
+    // Stop time (initially nil)
+    stopwatch = Array().push(stopwatch, nil);
+
+    return stopwatch;
+}
+
+fun start_stopwatch(stopwatch) {
+    var time_ns = Time();
+    return Array().set(stopwatch, 0, time_ns.now());
+}
+
+fun stop_stopwatch(stopwatch) {
+    var time_ns = Time();
+    return Array().set(stopwatch, 1, time_ns.now());
+}
+
+fun elapsed_time(stopwatch) {
+    var start_time = Array().get(stopwatch, 0);
+    var stop_time = Array().get(stopwatch, 1);
+
+    if (start_time == nil) {
+        return 0;
+    }
+
+    if (stop_time == nil) {
+        var time_ns = Time();
+        return time_ns.now() - start_time;
+    }
+
+    return stop_time - start_time;
+}
+
+print "Creating stopwatch...";
+var sw = create_stopwatch();
+
+print "Starting stopwatch...";
+sw = start_stopwatch(sw);
+
+// Wait briefly
+print "Waiting...";
+var j = 0;
+while (j < 5000000) {
+    j = j + 1;
+}
+
+print "Stopping stopwatch...";
+sw = stop_stopwatch(sw);
+
+var elapsed = elapsed_time(sw);
+print "Elapsed time: " + String().string(elapsed) + " milliseconds";
+
+print "\n=== Example Complete ===";

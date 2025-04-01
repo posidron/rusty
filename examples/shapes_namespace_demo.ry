@@ -1,0 +1,422 @@
+// Shapes Namespace Demo for Rusty Language
+// This example demonstrates creating a custom namespace for 2D shapes
+
+print "== Shapes Namespace Demo ==";
+print "-------------------------";
+
+// First, set up a Math namespace reference to use in calculations
+var math = Math();
+
+// Create a Shapes namespace with functions for creating and manipulating 2D shapes
+fun create_shapes_namespace() {
+    var shapes = array();
+
+    // Create a Point (x, y)
+    fun create_point(x, y) {
+        var point = array();
+        point = push(point, array("type", "point"));
+        point = push(point, array("x", x));
+        point = push(point, array("y", y));
+        return point;
+    }
+
+    // Calculate distance between two points
+    fun distance(p1, p2) {
+        var math = Math();
+        var x1 = get_prop(p1, "x");
+        var y1 = get_prop(p1, "y");
+        var x2 = get_prop(p2, "x");
+        var y2 = get_prop(p2, "y");
+
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        return math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Create a Circle (center_x, center_y, radius)
+    fun create_circle(x, y, radius) {
+        var circle = array();
+        circle = push(circle, array("type", "circle"));
+        circle = push(circle, array("center", create_point(x, y)));
+        circle = push(circle, array("radius", radius));
+        return circle;
+    }
+
+    // Calculate circle area
+    fun circle_area(circle) {
+        var math = Math();
+        var radius = get_prop(circle, "radius");
+        return math.PI * radius * radius;
+    }
+
+    // Calculate circle perimeter (circumference)
+    fun circle_perimeter(circle) {
+        var math = Math();
+        var radius = get_prop(circle, "radius");
+        return 2 * math.PI * radius;
+    }
+
+    // Create a Rectangle (x, y, width, height)
+    fun create_rectangle(x, y, width, height) {
+        var rect = array();
+        rect = push(rect, array("type", "rectangle"));
+        rect = push(rect, array("position", create_point(x, y)));
+        rect = push(rect, array("width", width));
+        rect = push(rect, array("height", height));
+        return rect;
+    }
+
+    // Calculate rectangle area
+    fun rectangle_area(rect) {
+        var width = get_prop(rect, "width");
+        var height = get_prop(rect, "height");
+        return width * height;
+    }
+
+    // Calculate rectangle perimeter
+    fun rectangle_perimeter(rect) {
+        var width = get_prop(rect, "width");
+        var height = get_prop(rect, "height");
+        return 2 * (width + height);
+    }
+
+    // Create a Triangle from three points
+    fun create_triangle(x1, y1, x2, y2, x3, y3) {
+        var triangle = array();
+        triangle = push(triangle, array("type", "triangle"));
+        triangle = push(triangle, array("p1", create_point(x1, y1)));
+        triangle = push(triangle, array("p2", create_point(x2, y2)));
+        triangle = push(triangle, array("p3", create_point(x3, y3)));
+        return triangle;
+    }
+
+    // Calculate triangle area using Heron's formula
+    fun triangle_area(triangle) {
+        var math = Math();
+        var p1 = get_prop(triangle, "p1");
+        var p2 = get_prop(triangle, "p2");
+        var p3 = get_prop(triangle, "p3");
+
+        var a = distance(p1, p2);
+        var b = distance(p2, p3);
+        var c = distance(p3, p1);
+
+        var s = (a + b + c) / 2; // Semi-perimeter
+        return math.sqrt(s * (s - a) * (s - b) * (s - c));
+    }
+
+    // Calculate triangle perimeter
+    fun triangle_perimeter(triangle) {
+        var p1 = get_prop(triangle, "p1");
+        var p2 = get_prop(triangle, "p2");
+        var p3 = get_prop(triangle, "p3");
+
+        var a = distance(p1, p2);
+        var b = distance(p2, p3);
+        var c = distance(p3, p1);
+
+        return a + b + c;
+    }
+
+    // Check if a point is inside a circle
+    fun point_in_circle(point, circle) {
+        var center = get_prop(circle, "center");
+        var radius = get_prop(circle, "radius");
+        var dist = distance(point, center);
+        return dist <= radius;
+    }
+
+    // Check if a circle overlaps with another circle
+    fun circles_overlap(circle1, circle2) {
+        var center1 = get_prop(circle1, "center");
+        var center2 = get_prop(circle2, "center");
+        var radius1 = get_prop(circle1, "radius");
+        var radius2 = get_prop(circle2, "radius");
+
+        var dist = distance(center1, center2);
+        return dist < (radius1 + radius2);
+    }
+
+    // Determine if a point is inside a rectangle
+    fun point_in_rectangle(point, rect) {
+        var pos = get_prop(rect, "position");
+        var width = get_prop(rect, "width");
+        var height = get_prop(rect, "height");
+
+        var rect_x = get_prop(pos, "x");
+        var rect_y = get_prop(pos, "y");
+        var point_x = get_prop(point, "x");
+        var point_y = get_prop(point, "y");
+
+        return point_x >= rect_x &&
+               point_x <= rect_x + width &&
+               point_y >= rect_y &&
+               point_y <= rect_y + height;
+    }
+
+    // Utility function to get a property from an object
+    fun get_prop(obj, prop_name) {
+        var i = 0;
+        while (i < length(obj)) {
+            var pair = get(obj, i);
+            var key = get(pair, 0);
+            var value = get(pair, 1);
+
+            if (key == prop_name) {
+                return value;
+            }
+            i = i + 1;
+        }
+        return nil;
+    }
+
+    // Calculate shape statistics
+    fun shape_info(shape) {
+        var shape_type = get_prop(shape, "type");
+        var result = "Shape type: " + shape_type + "\n";
+
+        if (shape_type == "circle") {
+            var center = get_prop(shape, "center");
+            var center_x = get_prop(center, "x");
+            var center_y = get_prop(center, "y");
+            var radius = get_prop(shape, "radius");
+
+            result = result + "Center: (" + as_string(center_x) + ", " + as_string(center_y) + ")\n";
+            result = result + "Radius: " + as_string(radius) + "\n";
+            result = result + "Area: " + as_string(circle_area(shape)) + "\n";
+            result = result + "Perimeter: " + as_string(circle_perimeter(shape));
+        }
+        else if (shape_type == "rectangle") {
+            var pos = get_prop(shape, "position");
+            var x = get_prop(pos, "x");
+            var y = get_prop(pos, "y");
+            var width = get_prop(shape, "width");
+            var height = get_prop(shape, "height");
+
+            result = result + "Position: (" + as_string(x) + ", " + as_string(y) + ")\n";
+            result = result + "Width: " + as_string(width) + "\n";
+            result = result + "Height: " + as_string(height) + "\n";
+            result = result + "Area: " + as_string(rectangle_area(shape)) + "\n";
+            result = result + "Perimeter: " + as_string(rectangle_perimeter(shape));
+        }
+        else if (shape_type == "triangle") {
+            var p1 = get_prop(shape, "p1");
+            var p2 = get_prop(shape, "p2");
+            var p3 = get_prop(shape, "p3");
+
+            var x1 = get_prop(p1, "x");
+            var y1 = get_prop(p1, "y");
+            var x2 = get_prop(p2, "x");
+            var y2 = get_prop(p2, "y");
+            var x3 = get_prop(p3, "x");
+            var y3 = get_prop(p3, "y");
+
+            result = result + "Points:\n";
+            result = result + "  P1: (" + as_string(x1) + ", " + as_string(y1) + ")\n";
+            result = result + "  P2: (" + as_string(x2) + ", " + as_string(y2) + ")\n";
+            result = result + "  P3: (" + as_string(x3) + ", " + as_string(y3) + ")\n";
+            result = result + "Area: " + as_string(triangle_area(shape)) + "\n";
+            result = result + "Perimeter: " + as_string(triangle_perimeter(shape));
+        }
+
+        return result;
+    }
+
+    // Helper function to add a sqrt function to Math
+    fun sqrt(x) {
+        // Since the Math namespace might not have a pow function,
+        // we'll implement square root using the Babylonian method
+        if (x < 0) {
+            return nil; // Cannot take square root of negative number
+        }
+
+        if (x == 0) {
+            return 0;
+        }
+
+        var estimate = x / 2;
+        var i = 0;
+
+        // Run 10 iterations for reasonable precision
+        while (i < 10) {
+            estimate = (estimate + (x / estimate)) / 2;
+            i = i + 1;
+        }
+
+        return estimate;
+    }
+
+    // Draw a shape (simple ASCII art)
+    fun draw_shape(shape) {
+        var shape_type = get_prop(shape, "type");
+
+        if (shape_type == "circle") {
+            return "  ****  \n" +
+                   " *    * \n" +
+                   "*      *\n" +
+                   "*      *\n" +
+                   " *    * \n" +
+                   "  ****  ";
+        }
+        else if (shape_type == "rectangle") {
+            return "********\n" +
+                   "*      *\n" +
+                   "*      *\n" +
+                   "********";
+        }
+        else if (shape_type == "triangle") {
+            return "   *   \n" +
+                   "  * *  \n" +
+                   " *   * \n" +
+                   "*******";
+        }
+
+        return "Unknown shape";
+    }
+
+    // Add all functions to the namespace
+    shapes = push(shapes, array("Point", create_point));
+    shapes = push(shapes, array("Circle", create_circle));
+    shapes = push(shapes, array("Rectangle", create_rectangle));
+    shapes = push(shapes, array("Triangle", create_triangle));
+    shapes = push(shapes, array("distance", distance));
+    shapes = push(shapes, array("circleArea", circle_area));
+    shapes = push(shapes, array("circlePerimeter", circle_perimeter));
+    shapes = push(shapes, array("rectangleArea", rectangle_area));
+    shapes = push(shapes, array("rectanglePerimeter", rectangle_perimeter));
+    shapes = push(shapes, array("triangleArea", triangle_area));
+    shapes = push(shapes, array("trianglePerimeter", triangle_perimeter));
+    shapes = push(shapes, array("pointInCircle", point_in_circle));
+    shapes = push(shapes, array("circlesOverlap", circles_overlap));
+    shapes = push(shapes, array("pointInRectangle", point_in_rectangle));
+    shapes = push(shapes, array("getInfo", shape_info));
+    shapes = push(shapes, array("draw", draw_shape));
+    shapes = push(shapes, array("sqrt", sqrt));
+
+    return shapes;
+}
+
+// Create the Shapes namespace
+var Shapes = create_shapes_namespace();
+
+// Demonstrate usage of the Shapes namespace
+print "\n== Creating and Inspecting Shapes ==";
+
+// Create a point
+var origin = Shapes.Point(0, 0);
+var point1 = Shapes.Point(3, 4);
+print "Distance from origin to point (3,4): " + as_string(Shapes.distance(origin, point1));
+
+// Create and analyze a circle
+print "\n== Circle Example ==";
+var circle = Shapes.Circle(5, 5, 10);
+print Shapes.getInfo(circle);
+print "\nCircle visualization:";
+print Shapes.draw(circle);
+
+// Check if a point is inside the circle
+var test_point = Shapes.Point(8, 8);
+var is_inside = Shapes.pointInCircle(test_point, circle);
+print "\nIs point (8,8) inside the circle? " + as_string(is_inside);
+
+// Create and analyze a rectangle
+print "\n== Rectangle Example ==";
+var rect = Shapes.Rectangle(10, 10, 20, 15);
+print Shapes.getInfo(rect);
+print "\nRectangle visualization:";
+print Shapes.draw(rect);
+
+// Create and analyze a triangle
+print "\n== Triangle Example ==";
+var triangle = Shapes.Triangle(0, 0, 10, 0, 5, 8);
+print Shapes.getInfo(triangle);
+print "\nTriangle visualization:";
+print Shapes.draw(triangle);
+
+// Complex example: Shape interactions
+print "\n== Shape Interactions ==";
+
+// Create two circles
+var circle1 = Shapes.Circle(0, 0, 5);
+var circle2 = Shapes.Circle(7, 7, 5);
+
+// Check if they overlap
+var overlapping = Shapes.circlesOverlap(circle1, circle2);
+print "Do the circles overlap? " + as_string(overlapping);
+
+// Create a point
+var test_point2 = Shapes.Point(15, 15);
+
+// Check if it's inside a rectangle
+var rect2 = Shapes.Rectangle(10, 10, 10, 10);
+var point_in_rect = Shapes.pointInRectangle(test_point2, rect2);
+print "Is point (15,15) inside the rectangle? " + as_string(point_in_rect);
+
+// Advanced usage: Create a scene with multiple shapes
+print "\n== Creating a Scene ==";
+
+fun create_scene() {
+    var Shapes = create_shapes_namespace();
+    var scene = array();
+
+    // Add some shapes to the scene
+    scene = push(scene, Shapes.Circle(10, 10, 5));
+    scene = push(scene, Shapes.Rectangle(15, 5, 10, 8));
+    scene = push(scene, Shapes.Triangle(5, 15, 15, 20, 0, 25));
+
+    // Calculate total area of all shapes
+    fun total_area() {
+        var total = 0;
+        var i = 0;
+
+        while (i < length(scene)) {
+            var shape = get(scene, i);
+            var type = Shapes.get_prop(shape, "type");
+
+            if (type == "circle") {
+                total = total + Shapes.circleArea(shape);
+            }
+            else if (type == "rectangle") {
+                total = total + Shapes.rectangleArea(shape);
+            }
+            else if (type == "triangle") {
+                total = total + Shapes.triangleArea(shape);
+            }
+
+            i = i + 1;
+        }
+
+        return total;
+    }
+
+    // Describe the scene
+    fun describe() {
+        var i = 0;
+        var result = "Scene with " + as_string(length(scene)) + " shapes:\n";
+
+        while (i < length(scene)) {
+            var shape = get(scene, i);
+            var type = Shapes.get_prop(shape, "type");
+            result = result + "- Shape " + as_string(i + 1) + ": " + type + "\n";
+            i = i + 1;
+        }
+
+        result = result + "\nTotal area of all shapes: " + as_string(total_area());
+        return result;
+    }
+
+    var scene_api = array();
+    scene_api = push(scene_api, array("shapes", scene));
+    scene_api = push(scene_api, array("totalArea", total_area));
+    scene_api = push(scene_api, array("describe", describe));
+
+    return scene_api;
+}
+
+// Create and use a scene
+var scene = create_scene();
+print scene.describe();
+
+print "\n== Shape Mathematics ==";
+print "Square root of 25: " + as_string(Shapes.sqrt(25));
+print "Circle with radius 1 has area: " + as_string(Shapes.circleArea(Shapes.Circle(0, 0, 1)));

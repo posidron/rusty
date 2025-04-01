@@ -364,40 +364,47 @@ fn parse_json_number(chars: &mut Peekable<Chars>) -> Result<Value, String> {
     }
 }
 
+// Helper function to escape strings for JSON
+fn escape_string(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+
+    for c in s.chars() {
+        match c {
+            '"' => result.push_str("\\\""),
+            '\\' => result.push_str("\\\\"),
+            '\u{0008}' => result.push_str("\\b"),
+            '\u{000C}' => result.push_str("\\f"),
+            '\n' => result.push_str("\\n"),
+            '\r' => result.push_str("\\r"),
+            '\t' => result.push_str("\\t"),
+            c if c.is_control() => {
+                // Format control characters as \uXXXX
+                result.push_str(&format!("\\u{:04x}", c as u32));
+            },
+            _ => result.push(c),
+        }
+    }
+
+    result
+}
+
 /// Convert a Rusty Value to a JSON string
 fn value_to_json_string(value: &Value) -> Result<String, String> {
     match value {
-        Value::Number(n) => Ok(n.to_string()),
-        Value::String(s) => {
-            // Escape special characters
-            let mut result = String::with_capacity(s.len() + 2);
-            result.push('"');
-
-            for c in s.chars() {
-                match c {
-                    '"' => result.push_str("\\\""),
-                    '\\' => result.push_str("\\\\"),
-                    '\u{0008}' => result.push_str("\\b"),
-                    '\u{000C}' => result.push_str("\\f"),
-                    '\n' => result.push_str("\\n"),
-                    '\r' => result.push_str("\\r"),
-                    '\t' => result.push_str("\\t"),
-                    c if c.is_control() => {
-                        // Format control characters as \uXXXX
-                        result.push_str(&format!("\\u{:04x}", c as u32));
-                    },
-                    _ => result.push(c),
-                }
+        Value::Number(n) => {
+            // JSON doesn't allow Infinity or NaN
+            if n.is_finite() {
+                Ok(n.to_string())
+            } else {
+                Ok("null".to_string())
             }
-
-            result.push('"');
-            Ok(result)
         },
+        Value::String(s) => Ok(format!("\"{}\"", escape_string(s))),
         Value::Boolean(b) => Ok(b.to_string()),
         Value::Nil => Ok("null".to_string()),
-        Value::Array(elements) => {
+        Value::Array(a) => {
             // If first element is an array of [key, value] pairs, treat as object
-            if !elements.is_empty() && elements.iter().all(|e| {
+            if !a.is_empty() && a.iter().all(|e| {
                 if let Value::Array(pair) = e {
                     pair.len() == 2 && matches!(pair[0], Value::String(_))
                 } else {
@@ -407,7 +414,7 @@ fn value_to_json_string(value: &Value) -> Result<String, String> {
                 // Convert to JSON object
                 let mut result = String::from("{");
 
-                for (i, element) in elements.iter().enumerate() {
+                for (i, element) in a.iter().enumerate() {
                     if i > 0 {
                         result.push_str(", ");
                     }
@@ -430,7 +437,7 @@ fn value_to_json_string(value: &Value) -> Result<String, String> {
                 // Convert to JSON array
                 let mut result = String::from("[");
 
-                for (i, element) in elements.iter().enumerate() {
+                for (i, element) in a.iter().enumerate() {
                     if i > 0 {
                         result.push_str(", ");
                     }
@@ -442,12 +449,46 @@ fn value_to_json_string(value: &Value) -> Result<String, String> {
                 Ok(result)
             }
         },
-        Value::Function(_) => {
-            // Functions cannot be represented in JSON, so convert to null
-            Ok("null".to_string())
+        Value::Object(obj) => {
+            // Convert to JSON object format
+            let mut json_parts = Vec::new();
+
+            for (key, value) in obj {
+                let escaped_key = escape_string(key);
+                let value_str = match value_to_json_string(value) {
+                    Ok(s) => s,
+                    Err(e) => return Err(e),
+                };
+
+                json_parts.push(format!("\"{}\":{}", escaped_key, value_str));
+            }
+
+            Ok(format!("{{{}}}", json_parts.join(",")))
         },
-        Value::NativeFunction(_) => {
-            // Native functions cannot be represented in JSON, so convert to null
+        Value::Namespace(name, props) => {
+            // Convert namespace to JSON object format
+            let mut json_parts = Vec::new();
+
+            // Add namespace name as a special property
+            json_parts.push(format!("\"__namespace\":\"{}\"", escape_string(name)));
+
+            for (key, value) in props {
+                // Skip functions in namespace serialization
+                if !matches!(value, Value::Function(_) | Value::NativeFunction(_)) {
+                    let escaped_key = escape_string(key);
+                    let value_str = match value_to_json_string(value) {
+                        Ok(s) => s,
+                        Err(e) => return Err(e),
+                    };
+
+                    json_parts.push(format!("\"{}\":{}", escaped_key, value_str));
+                }
+            }
+
+            Ok(format!("{{{}}}", json_parts.join(",")))
+        },
+        Value::Function(_) | Value::NativeFunction(_) => {
+            // Functions are skipped or represented as null in JSON
             Ok("null".to_string())
         },
     }

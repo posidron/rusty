@@ -8,7 +8,11 @@ pub enum Expr {
     Unary(Token, Box<Expr>),
     Variable(Token),
     Assign(Token, Box<Expr>),
+    Logical(Box<Expr>, Token, Box<Expr>),
     Call(Box<Expr>, Token, Vec<Expr>),
+    Get(Box<Expr>, Token),
+    Method(Box<Expr>, Token, Vec<Expr>),
+    Array(Vec<Expr>),
 }
 
 #[derive(Debug, Clone)]
@@ -333,6 +337,27 @@ impl Parser {
             if self.match_token(&[TokenType::LeftParen]) {
                 self.skip_newlines();
                 expr = self.finish_call(expr)?;
+            } else if self.match_token(&[TokenType::Dot]) {
+                // Handle property access and method calls
+                let name = self.consume(TokenType::Identifier("".to_string()), "Expect property name after '.'.")?;
+
+                if self.match_token(&[TokenType::LeftParen]) {
+                    // Method call: object.method(args)
+                    let mut arguments = Vec::new();
+                    if !self.check(TokenType::RightParen) {
+                        loop {
+                            arguments.push(self.expression()?);
+                            if !self.match_token(&[TokenType::Comma]) {
+                                break;
+                            }
+                        }
+                    }
+                    self.consume(TokenType::RightParen, "Expect ')' after arguments.")?;
+                    expr = Expr::Method(Box::new(expr), name.clone(), arguments);
+                } else {
+                    // Property access: object.property
+                    expr = Expr::Get(Box::new(expr), name.clone());
+                }
             } else {
                 break;
             }

@@ -1,0 +1,99 @@
+// Regex Namespace Example
+// Demonstrates all methods in the Regex namespace
+
+print "=== Regex Namespace Example ===";
+
+// Create Regex namespace
+var regex = Regex();
+var string_ns = String();
+var array_ns = Array();
+
+// Creating a pattern
+print "\n== Creating Patterns ==";
+var digit_pattern = regex.new("[0-9]+");
+print "Pattern created: [0-9]+";
+
+// Checking pattern validity
+print "\n== Pattern Validation ==";
+print "Is '[0-9]+' valid: " + string_ns.string(regex.is_valid("[0-9]+"));
+print "Is '[0-9' valid: " + string_ns.string(regex.is_valid("[0-9"));
+
+// Testing patterns
+print "\n== Testing Patterns ==";
+print "Does '123' match digits pattern: " + string_ns.string(regex.test(digit_pattern, "123"));
+print "Does 'abc' match digits pattern: " + string_ns.string(regex.test(digit_pattern, "abc"));
+print "Does 'abc123' match digits pattern: " + string_ns.string(regex.test(digit_pattern, "abc123"));
+
+// Finding all matches
+print "\n== Finding All Matches ==";
+var text = "Order #12345 contains 42 items for $9.99";
+print "Text: " + text;
+var matches = regex.match(digit_pattern, text);
+print "All digit matches: " + string_ns.string(matches);
+
+// Replacing matches
+print "\n== Replacing Matches ==";
+var replaced = regex.replace(digit_pattern, text, "X");
+print "After replacing digits: " + replaced;
+
+// Splitting text
+print "\n== Splitting Text ==";
+var comma_pattern = regex.new(",\\s*");
+var csv_text = "apple, orange, banana, grape";
+print "CSV text: " + csv_text;
+var split_result = regex.split(comma_pattern, csv_text);
+print "After splitting: " + string_ns.string(split_result);
+
+// Capturing groups
+print "\n== Capturing Groups ==";
+var capture_pattern = regex.new("(\\w+)=(\\d+)");
+var config_text = "width=100 height=200";
+print "Config text: " + config_text;
+var captures = regex.capture(capture_pattern, config_text);
+if (captures != nil) {
+    print "Full match: " + array_ns.get(captures, 0);
+    print "Key: " + array_ns.get(captures, 1);
+    print "Value: " + array_ns.get(captures, 2);
+}
+
+// Escaping special characters
+print "\n== Escaping Characters ==";
+var input = "Hello (world) with [brackets] and {braces}";
+print "Original: " + input;
+var escaped = regex.escape(input);
+print "Escaped: " + escaped;
+
+// Creating a pattern with escaped characters
+var literal_pattern = regex.new(escaped);
+print "Test exact match: " + string_ns.string(regex.test(literal_pattern, input));
+
+// Practical example: email validator
+print "\n== Practical Example: Email Validator ==";
+
+fun is_valid_email(email) {
+    var regex_ns = Regex();
+    var email_pattern = regex_ns.new("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$");
+    return regex_ns.test(email_pattern, email);
+}
+
+var emails = array_ns.create();
+emails = array_ns.push(emails, "user@example.com");
+emails = array_ns.push(emails, "invalid-email");
+emails = array_ns.push(emails, "another.user@subdomain.example.co.uk");
+emails = array_ns.push(emails, "@missing-username.com");
+
+var i = 0;
+while (i < array_ns.length(emails)) {
+    var email = array_ns.get(emails, i);
+    var is_valid = is_valid_email(email);
+
+    if (is_valid) {
+        print "Email '" + email + "' is valid";
+    } else {
+        print "Email '" + email + "' is invalid";
+    }
+
+    i = i + 1;
+}
+
+print "\n=== Example Complete ===";

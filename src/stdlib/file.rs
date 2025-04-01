@@ -3,164 +3,208 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
-/// Unified file function for all operations
+/// Read a file and return its contents as a string
+pub fn read(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err(format!("read: expected 1 argument, got {}", args.len()));
+    }
+
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("read: expected a string filepath".to_string()),
+    };
+
+    match fs::read_to_string(path) {
+        Ok(content) => Ok(Value::String(content)),
+        Err(e) => Err(format!("read: failed to read file '{}': {}", path, e)),
+    }
+}
+
+/// Write content to a file
+pub fn write(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 2 {
+        return Err(format!("write: expected 2 arguments, got {}", args.len()));
+    }
+
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("write: expected a string filepath".to_string()),
+    };
+
+    let content = match &args[1] {
+        Value::String(s) => s,
+        _ => return Err("write: expected a string content".to_string()),
+    };
+
+    match fs::write(path, content) {
+        Ok(_) => Ok(Value::Boolean(true)),
+        Err(e) => Err(format!("write: failed to write to file '{}': {}", path, e)),
+    }
+}
+
+/// Append content to a file
+pub fn append(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 2 {
+        return Err(format!("append: expected 2 arguments, got {}", args.len()));
+    }
+
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("append: expected a string filepath".to_string()),
+    };
+
+    let content = match &args[1] {
+        Value::String(s) => s,
+        _ => return Err("append: expected a string content".to_string()),
+    };
+
+    let result = std::fs::OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open(path)
+        .and_then(|mut file| {
+            file.write_all(content.as_bytes())?;
+            Ok(())
+        });
+
+    match result {
+        Ok(_) => Ok(Value::Boolean(true)),
+        Err(e) => Err(format!("append: failed to append to file '{}': {}", path, e)),
+    }
+}
+
+/// Check if a file exists
+pub fn exists(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err(format!("exists: expected 1 argument, got {}", args.len()));
+    }
+
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("exists: expected a string filepath".to_string()),
+    };
+
+    Ok(Value::Boolean(std::path::Path::new(path).exists()))
+}
+
+/// Delete a file
+pub fn delete(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err(format!("delete: expected 1 argument, got {}", args.len()));
+    }
+
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("delete: expected a string filepath".to_string()),
+    };
+
+    if !std::path::Path::new(path).exists() {
+        return Ok(Value::Boolean(false));
+    }
+
+    match fs::remove_file(path) {
+        Ok(_) => Ok(Value::Boolean(true)),
+        Err(e) => Err(format!("delete: failed to delete file '{}': {}", path, e)),
+    }
+}
+
+/// The unified file function that was used previously
+/// This maintains backward compatibility
 pub fn file(args: Vec<Value>) -> Result<Value, String> {
-    // Third argument (content) is optional, defaulting to nil
-    let content = if args.len() > 2 { &args[2] } else { &Value::Nil };
+    if args.len() < 2 {
+        return Err("file: requires at least 2 arguments (path, mode)".to_string());
+    }
 
-    match (&args[0], &args[1]) {
-        (Value::String(filepath), Value::String(mode)) => {
-            match mode.as_str() {
-                // Read mode: file(path, "r") -> string content
-                "r" => {
-                    match fs::read_to_string(filepath) {
-                        Ok(content) => Ok(Value::String(content)),
-                        Err(err) => Err(format!("file: failed to read '{}': {}", filepath, err)),
-                    }
-                },
+    let path = match &args[0] {
+        Value::String(s) => s,
+        _ => return Err("file: first argument must be a string filepath".to_string()),
+    };
 
-                // Write mode: file(path, "w", content) -> boolean success
-                "w" => {
-                    if let Value::String(content_str) = content {
-                        // Ensure parent directory exists
-                        if let Some(parent) = Path::new(filepath).parent() {
-                            if !parent.exists() {
-                                if let Err(err) = fs::create_dir_all(parent) {
-                                    return Err(format!("file: failed to create directories for '{}': {}", filepath, err));
-                                }
-                            }
-                        }
+    let mode = match &args[1] {
+        Value::String(s) => s,
+        _ => return Err("file: second argument must be a string mode".to_string()),
+    };
 
-                        match fs::write(filepath, content_str) {
-                            Ok(_) => Ok(Value::Boolean(true)),
-                            Err(err) => Err(format!("file: failed to write to '{}': {}", filepath, err)),
-                        }
-                    } else {
-                        Err("file: in write mode, content must be a string".to_string())
-                    }
-                },
-
-                // Append mode: file(path, "a", content) -> boolean success
-                "a" => {
-                    if let Value::String(content_str) = content {
-                        // Ensure parent directory exists
-                        if let Some(parent) = Path::new(filepath).parent() {
-                            if !parent.exists() {
-                                if let Err(err) = fs::create_dir_all(parent) {
-                                    return Err(format!("file: failed to create directories for '{}': {}", filepath, err));
-                                }
-                            }
-                        }
-
-                        let result = if Path::new(filepath).exists() {
-                            // Append to existing file
-                            let mut file = match fs::OpenOptions::new().append(true).open(filepath) {
-                                Ok(file) => file,
-                                Err(err) => return Err(format!("file: failed to open '{}': {}", filepath, err)),
-                            };
-
-                            match file.write_all(content_str.as_bytes()) {
-                                Ok(_) => Ok(Value::Boolean(true)),
-                                Err(err) => Err(format!("file: failed to append to '{}': {}", filepath, err)),
-                            }
-                        } else {
-                            // Create new file
-                            match fs::write(filepath, content_str) {
-                                Ok(_) => Ok(Value::Boolean(true)),
-                                Err(err) => Err(format!("file: failed to create '{}': {}", filepath, err)),
-                            }
-                        };
-
-                        result
-                    } else {
-                        Err("file: in append mode, content must be a string".to_string())
-                    }
-                },
-
-                // Delete mode: file(path, "d") -> boolean success
-                "d" => {
-                    let path = Path::new(filepath);
-                    if !path.exists() {
-                        return Ok(Value::Boolean(false));
-                    }
-
-                    match fs::remove_file(path) {
-                        Ok(_) => Ok(Value::Boolean(true)),
-                        Err(err) => Err(format!("file: failed to delete '{}': {}", filepath, err)),
-                    }
-                },
-
-                // Exists mode: file(path, "e") -> boolean exists
-                "e" => {
-                    Ok(Value::Boolean(Path::new(filepath).exists()))
-                },
-
-                // Invalid mode
-                _ => Err(format!("file: invalid mode '{}' (valid modes: 'r', 'w', 'a', 'd', 'e')", mode)),
+    match mode.as_str() {
+        "r" => read(vec![args[0].clone()]),
+        "w" => {
+            if args.len() < 3 {
+                return Err("file: write mode requires content argument".to_string());
             }
-        },
-        (_, Value::String(_)) => Err("file: first argument must be a string filepath".to_string()),
-        (Value::String(_), _) => Err("file: second argument must be a string mode".to_string()),
-        _ => Err("file: arguments must be (string filepath, string mode, [optional content])".to_string()),
+            write(vec![args[0].clone(), args[2].clone()])
+        }
+        "a" => {
+            if args.len() < 3 {
+                return Err("file: append mode requires content argument".to_string());
+            }
+            append(vec![args[0].clone(), args[2].clone()])
+        }
+        "e" => exists(vec![args[0].clone()]),
+        "d" => delete(vec![args[0].clone()]),
+        _ => Err(format!("file: invalid mode '{}', expected 'r', 'w', 'a', 'e', or 'd'", mode)),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
-    use std::path::Path;
+    use tempfile::NamedTempFile;
+    use std::io::Read;
 
     #[test]
     fn test_file_operations() {
-        // Ensure test directory exists
-        let test_dir = "test_files";
-        let test_path = format!("{}/test_file.txt", test_dir);
-
-        if !Path::new(test_dir).exists() {
-            fs::create_dir_all(test_dir).expect("Failed to create test directory");
-        }
+        // Create a temporary file
+        let file = NamedTempFile::new().unwrap();
+        let path = file.path().to_str().unwrap().to_string();
 
         // Test write
         let write_args = vec![
-            Value::String(test_path.clone()),
-            Value::String("w".to_string()),
-            Value::String("Test content".to_string()),
+            Value::String(path.clone()),
+            Value::String("Hello, world!".to_string()),
         ];
-        let write_result = file(write_args).unwrap();
-        assert!(matches!(write_result, Value::Boolean(true)));
-
-        // Test exists (should be true)
-        let exists_args = vec![
-            Value::String(test_path.clone()),
-            Value::String("e".to_string()),
-        ];
-        let exists_result = file(exists_args).unwrap();
-        assert!(matches!(exists_result, Value::Boolean(true)));
+        let write_result = write(write_args).unwrap();
+        assert_eq!(write_result, Value::Boolean(true));
 
         // Test read
-        let read_args = vec![
-            Value::String(test_path.clone()),
-            Value::String("r".to_string()),
-        ];
-        let read_result = file(read_args).unwrap();
+        let read_args = vec![Value::String(path.clone())];
+        let read_result = read(read_args).unwrap();
         if let Value::String(content) = read_result {
-            assert_eq!(content, "Test content");
+            assert_eq!(content, "Hello, world!");
         } else {
             panic!("Expected string result");
         }
 
-        // Test delete
-        let delete_args = vec![
-            Value::String(test_path.clone()),
-            Value::String("d".to_string()),
+        // Test append
+        let append_args = vec![
+            Value::String(path.clone()),
+            Value::String(" Appended text.".to_string()),
         ];
-        let delete_result = file(delete_args).unwrap();
-        assert!(matches!(delete_result, Value::Boolean(true)));
+        let append_result = append(append_args).unwrap();
+        assert_eq!(append_result, Value::Boolean(true));
 
-        // Cleanup
-        if Path::new(&test_path).exists() {
-            fs::remove_file(&test_path).ok();
+        // Test read after append
+        let read_args = vec![Value::String(path.clone())];
+        let read_result = read(read_args).unwrap();
+        if let Value::String(content) = read_result {
+            assert_eq!(content, "Hello, world! Appended text.");
+        } else {
+            panic!("Expected string result");
         }
+
+        // Test exists
+        let exists_args = vec![Value::String(path.clone())];
+        let exists_result = exists(exists_args).unwrap();
+        assert_eq!(exists_result, Value::Boolean(true));
+
+        // Test delete
+        let delete_args = vec![Value::String(path.clone())];
+        let delete_result = delete(delete_args).unwrap();
+        assert_eq!(delete_result, Value::Boolean(true));
+
+        // Test exists after delete
+        let exists_args = vec![Value::String(path.clone())];
+        let exists_result = exists(exists_args).unwrap();
+        assert_eq!(exists_result, Value::Boolean(false));
     }
 }

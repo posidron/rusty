@@ -1,5 +1,0 @@
-Hello, this is a sample text file for fuzzing!
-It contains multiple lines of text.
-We can test various mutation strategies on this content.
-The fuzzer will generate different variations of this text.
-Let's see what interesting mutations it can create!

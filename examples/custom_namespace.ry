@@ -1,0 +1,154 @@
+// Custom Namespace Example
+// Demonstrates how to create your own namespaces in Rusty
+
+print "=== Custom Namespace Example ===";
+
+// Create utility functions that we'll add to our namespace
+fun is_even(n) {
+    return n % 2 == 0;
+}
+
+fun is_odd(n) {
+    return n % 2 == 1;
+}
+
+fun factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+fun fibonacci(n) {
+    if (n <= 0) {
+        return 0;
+    }
+    if (n == 1) {
+        return 1;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Create a Math utilities namespace
+fun create_math_utils() {
+    var namespace = Array().create();
+
+    // Add the is_even method
+    var even_method = Array().create();
+    even_method = Array().push(even_method, "is_even");
+    even_method = Array().push(even_method, is_even);
+    namespace = Array().push(namespace, even_method);
+
+    // Add the is_odd method
+    var odd_method = Array().create();
+    odd_method = Array().push(odd_method, "is_odd");
+    odd_method = Array().push(odd_method, is_odd);
+    namespace = Array().push(namespace, odd_method);
+
+    // Add the factorial method
+    var factorial_method = Array().create();
+    factorial_method = Array().push(factorial_method, "factorial");
+    factorial_method = Array().push(factorial_method, factorial);
+    namespace = Array().push(namespace, factorial_method);
+
+    // Add the fibonacci method
+    var fibonacci_method = Array().create();
+    fibonacci_method = Array().push(fibonacci_method, "fibonacci");
+    fibonacci_method = Array().push(fibonacci_method, fibonacci);
+    namespace = Array().push(namespace, fibonacci_method);
+
+    // Add a PI constant
+    var pi_const = Array().create();
+    pi_const = Array().push(pi_const, "PI");
+    pi_const = Array().push(pi_const, 3.14159265359);
+    namespace = Array().push(namespace, pi_const);
+
+    return namespace;
+}
+
+// Create our namespace
+var MathUtils = create_math_utils();
+
+// Test using our custom namespace
+print "\n== Using Custom Namespace ==";
+print "Is 4 even? " + String().string(MathUtils.is_even(4));
+print "Is 7 odd? " + String().string(MathUtils.is_odd(7));
+print "Factorial of 5: " + String().string(MathUtils.factorial(5));
+print "Fibonacci(8): " + String().string(MathUtils.fibonacci(8));
+print "Our PI constant: " + String().string(MathUtils.PI);
+
+// Creating a more complex namespace with helper functions and
+// internal state
+print "\n== Counter Namespace Example ==";
+
+fun create_counter(start_value) {
+    var namespace = Array().create();
+
+    // Internal state - the current count
+    var count = start_value;
+
+    // Increment method
+    fun increment(amount) {
+        count = count + amount;
+        return count;
+    }
+
+    // Add the increment method
+    var increment_method = Array().create();
+    increment_method = Array().push(increment_method, "increment");
+    increment_method = Array().push(increment_method, increment);
+    namespace = Array().push(namespace, increment_method);
+
+    // Decrement method
+    fun decrement(amount) {
+        count = count - amount;
+        return count;
+    }
+
+    // Add the decrement method
+    var decrement_method = Array().create();
+    decrement_method = Array().push(decrement_method, "decrement");
+    decrement_method = Array().push(decrement_method, decrement);
+    namespace = Array().push(namespace, decrement_method);
+
+    // Reset method
+    fun reset() {
+        count = start_value;
+        return count;
+    }
+
+    // Add the reset method
+    var reset_method = Array().create();
+    reset_method = Array().push(reset_method, "reset");
+    reset_method = Array().push(reset_method, reset);
+    namespace = Array().push(namespace, reset_method);
+
+    // Get value method
+    fun get_value() {
+        return count;
+    }
+
+    // Add the getValue method
+    var get_value_method = Array().create();
+    get_value_method = Array().push(get_value_method, "get_value");
+    get_value_method = Array().push(get_value_method, get_value);
+    namespace = Array().push(namespace, get_value_method);
+
+    return namespace;
+}
+
+// Create a counter starting at 10
+var counter = create_counter(10);
+
+print "Initial value: " + String().string(counter.get_value());
+print "After increment by 5: " + String().string(counter.increment(5));
+print "After decrement by 3: " + String().string(counter.decrement(3));
+print "After reset: " + String().string(counter.reset());
+
+// Create another counter instance with different starting value
+print "\nCreating another counter instance:";
+var counter2 = create_counter(100);
+print "Counter2 initial value: " + String().string(counter2.get_value());
+print "Counter1 value: " + String().string(counter.get_value());
+
+print "\n=== Example Complete ===";

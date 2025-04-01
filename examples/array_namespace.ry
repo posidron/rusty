@@ -1,0 +1,79 @@
+// Array Namespace Example
+// Demonstrates all methods in the Array namespace
+
+print "=== Array Namespace Example ===";
+
+// Create Array namespace
+var arr = Array();
+
+// Creating arrays
+print "\n== Creating Arrays ==";
+var numbers = arr.create();  // Create empty array
+print "Empty array: " + String().string(numbers);
+
+// Adding elements
+print "\n== Adding Elements ==";
+numbers = arr.push(numbers, 10);
+numbers = arr.push(numbers, 20);
+numbers = arr.push(numbers, 30);
+print "After pushing elements: " + String().string(numbers);
+
+// Array information
+print "\n== Array Information ==";
+print "Length: " + String().string(arr.length(numbers));
+print "First element: " + String().string(arr.get(numbers, 0));
+print "Second element: " + String().string(arr.get(numbers, 1));
+print "Last element: " + String().string(arr.get(numbers, arr.length(numbers) - 1));
+
+// Modifying arrays
+print "\n== Modifying Arrays ==";
+var modified = arr.set(numbers, 1, 25);  // Replace second element
+print "After setting index 1 to 25: " + String().string(modified);
+
+// Removing elements
+print "\n== Removing Elements ==";
+var popped = arr.pop(modified);
+print "Popped value: " + String().string(popped);
+print "After pop: " + String().string(arr.pop(modified));
+
+// Combining arrays
+print "\n== Combining Arrays ==";
+var more_numbers = arr.create();
+more_numbers = arr.push(more_numbers, 40);
+more_numbers = arr.push(more_numbers, 50);
+print "First array: " + String().string(numbers);
+print "Second array: " + String().string(more_numbers);
+
+var combined = arr.concat(numbers, more_numbers);
+print "Combined array: " + String().string(combined);
+
+// Joining elements
+print "\n== Joining Elements ==";
+var joined = arr.join(numbers, ", ");
+print "Joined with comma: \"" + joined + "\"";
+joined = arr.join(numbers, " | ");
+print "Joined with pipe: \"" + joined + "\"";
+
+// Practical example: calculating sum and average
+print "\n== Practical Example: Statistics ==";
+fun calculate_stats(numbers) {
+    var sum = 0;
+    var i = 0;
+    var len = arr.length(numbers);
+
+    while (i < len) {
+        sum = sum + arr.get(numbers, i);
+        i = i + 1;
+    }
+
+    var average = sum / len;
+
+    return [sum, average];  // Return array with results
+}
+
+var stats = calculate_stats(numbers);
+print "Numbers: " + String().string(numbers);
+print "Sum: " + String().string(stats[0]);
+print "Average: " + String().string(stats[1]);
+
+print "\n=== Example Complete ===";

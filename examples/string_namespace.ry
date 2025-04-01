@@ -1,0 +1,57 @@
+// String Namespace Example
+// Demonstrates all methods in the String namespace
+
+print "=== String Namespace Example ===";
+
+// Create String namespace
+var str = String();
+
+// Basic string operations
+print "\n== Basic String Operations ==";
+var text = "Hello, Rusty World!";
+print "Original text: \"" + text + "\"";
+print "length() = " + str.string(str.length(text));
+print "upper() = \"" + str.upper(text) + "\"";
+print "lower() = \"" + str.lower(text) + "\"";
+
+// Converting values to strings
+print "\n== Value to String Conversion ==";
+var num = 42.5;
+print "Number: " + str.string(num);
+
+var bool_val = true;
+print "Boolean: " + str.string(bool_val);
+
+// Practical example: formatting output
+print "\n== Practical Example: Formatting Output ==";
+fun format_person(name, age, height) {
+    var result = "Name: " + name + "\n";
+    result = result + "Age: " + str.string(age) + " years\n";
+    result = result + "Height: " + str.string(height) + " cm";
+    return result;
+}
+
+var name = "Alice";
+var age = 30;
+var height = 165.5;
+
+print format_person(name, age, height);
+
+// Working with individual characters
+print "\n== Character Manipulation ==";
+var vowels = "aeiou";
+print "Original: \"" + vowels + "\"";
+
+var arr = Array();
+var vowels_arr = arr.create();
+var i = 0;
+while (i < str.length(vowels)) {
+    vowels_arr = arr.push(vowels_arr, arr.get(vowels, i));
+    i = i + 1;
+}
+
+print "Characters as array: " + str.string(vowels_arr);
+print "First character: " + arr.get(vowels, 0);
+print "Last character: " + arr.get(vowels, str.length(vowels) - 1);
+
+print "\n=== Example Complete ===";

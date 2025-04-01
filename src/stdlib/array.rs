@@ -150,7 +150,7 @@ pub fn join(args: Vec<Value>) -> Result<Value, String> {
                     result.push_str(separator);
                 }
                 match value {
-                    Value::String(s) => result.push_str(s),
+                    Value::String(s) => result.push_str(&format!("\"{}\"", s)),
                     Value::Number(n) => {
                         let text = n.to_string();
                         if text.ends_with(".0") {
@@ -164,6 +164,8 @@ pub fn join(args: Vec<Value>) -> Result<Value, String> {
                     Value::Function(f) => result.push_str(&format!("<fn {}>", f.name.lexeme)),
                     Value::NativeFunction(f) => result.push_str(&format!("<native fn {}>", f.name)),
                     Value::Array(_) => result.push_str("[array]"),
+                    Value::Object(_) => result.push_str("{object}"),
+                    Value::Namespace(name, _) => result.push_str(&format!("[Namespace: {}]", name)),
                 }
             }
             Ok(Value::String(result))

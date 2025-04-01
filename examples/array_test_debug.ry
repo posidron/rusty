@@ -1,0 +1,20 @@
+// Array Test Debug
+print "Testing Array creation and methods...";
+
+// Create Array namespace
+var arr = Array();
+
+// Test creating an array using create method
+var numbers = arr.create();
+print "Created empty array: " + String().string(numbers);
+
+// Test if it's a valid array
+if (numbers != nil) {
+    print "Array is valid, not nil";
+}
+
+// Try to push values
+numbers = arr.push(numbers, 10);
+print "After push: " + String().string(numbers);
+
+print "Test complete!";
