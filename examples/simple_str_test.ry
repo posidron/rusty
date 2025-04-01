@@ -1,0 +1,10 @@
+// Simple String Test
+print "=== Simple String Test ===";
+
+// String method test
+var text = "Hello";
+print "Original: " + text;
+print "Length: " + String.string(String.length(text));
+print "Upper: " + String.upper(text);
+
+print "=== End Test ===";

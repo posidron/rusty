@@ -426,13 +426,12 @@ impl Interpreter {
                 }
             },
             Expr::Get(object, name) => {
-                // Special case for Array.method static method access (when used without immediate call)
+                // Special case for namespace.method static method access (when used without immediate call)
                 if let Expr::Variable(var_name) = &**object {
-                    if var_name.lexeme == "Array" {
-                        let method_name = format!("Array.{}", name.lexeme);
-                        if let Some(method) = self.environment.get(&method_name) {
-                            return Ok(method);
-                        }
+                    // Support any namespace (Array, String, Math, etc.)
+                    let method_name = format!("{}.{}", var_name.lexeme, name.lexeme);
+                    if let Some(method) = self.environment.get(&method_name) {
+                        return Ok(method);
                     }
                 }
 
@@ -464,29 +463,28 @@ impl Interpreter {
                 }
             },
             Expr::Method(object, name, arguments) => {
-                // Special case for Array.method() static method calls
+                // Special case for namespace.method() static method calls
                 if let Expr::Variable(var_name) = &**object {
-                    if var_name.lexeme == "Array" {
-                        let method_name = format!("Array.{}", name.lexeme);
-                        if let Some(method) = self.environment.get(&method_name) {
-                            let mut args = Vec::new();
-                            for argument in arguments {
-                                args.push(self.evaluate(argument)?);
+                    // Support any namespace (Array, String, Math, etc.)
+                    let method_name = format!("{}.{}", var_name.lexeme, name.lexeme);
+                    if let Some(method) = self.environment.get(&method_name) {
+                        let mut args = Vec::new();
+                        for argument in arguments {
+                            args.push(self.evaluate(argument)?);
+                        }
+
+                        if let Value::NativeFunction(function) = &method {
+                            if function.arity != 0 && args.len() != function.arity {
+                                return Err(RuntimeError::Error(format!(
+                                    "Expected {} arguments but got {}.",
+                                    function.arity,
+                                    args.len()
+                                )));
                             }
 
-                            if let Value::NativeFunction(function) = &method {
-                                if function.arity != 0 && args.len() != function.arity {
-                                    return Err(RuntimeError::Error(format!(
-                                        "Expected {} arguments but got {}.",
-                                        function.arity,
-                                        args.len()
-                                    )));
-                                }
-
-                                match (function.function)(args) {
-                                    Ok(value) => return Ok(value),
-                                    Err(message) => return Err(RuntimeError::Error(message)),
-                                }
+                            match (function.function)(args) {
+                                Ok(value) => return Ok(value),
+                                Err(message) => return Err(RuntimeError::Error(message)),
                             }
                         }
                     }

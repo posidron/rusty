@@ -39,13 +39,19 @@ fn get_array_namespace(args: Vec<Value>) -> Result<Value, String> {
     return array::array(args);
 }
 
-fn get_string_namespace(_args: Vec<Value>) -> Result<Value, String> {
-    unsafe {
-        if let Some(ref ns) = STRING_NAMESPACE {
-            Ok(ns.clone())
-        } else {
-            Err("String namespace not initialized".to_string())
+fn get_string_namespace(args: Vec<Value>) -> Result<Value, String> {
+    if args.is_empty() {
+        // If called with no arguments, return the namespace
+        unsafe {
+            if let Some(ref ns) = STRING_NAMESPACE {
+                return Ok(ns.clone());
+            } else {
+                return Err("String namespace not initialized".to_string());
+            }
         }
+    } else {
+        // If called with arguments, convert to string
+        return string::as_string(vec![args[0].clone()]);
     }
 }
 
@@ -161,9 +167,16 @@ impl StdLib {
             });
 
             if let Value::Namespace(_, props) = &mut math_namespace {
-                props.insert(name.to_string(), Value::NativeFunction(math_fn));
+                props.insert(name.to_string(), Value::NativeFunction(math_fn.clone()));
             }
+
+            // Also register the function directly for static access
+            self.register(&format!("Math.{}", name), arity, func);
         }
+
+        // Add PI and E as static properties too
+        self.register("Math.PI", 0, |_| Ok(Value::Number(std::f64::consts::PI)));
+        self.register("Math.E", 0, |_| Ok(Value::Number(std::f64::consts::E)));
 
         // Store the namespace in the global variable
         unsafe {
@@ -221,10 +234,10 @@ impl StdLib {
 
         // Add methods to String namespace
         if let Value::Namespace(_, props) = &mut string_namespace {
-            props.insert("length".to_string(), Value::NativeFunction(len_fn));
-            props.insert("upper".to_string(), Value::NativeFunction(upper_fn));
-            props.insert("lower".to_string(), Value::NativeFunction(lower_fn));
-            props.insert("string".to_string(), Value::NativeFunction(as_string_fn));
+            props.insert("length".to_string(), Value::NativeFunction(len_fn.clone()));
+            props.insert("upper".to_string(), Value::NativeFunction(upper_fn.clone()));
+            props.insert("lower".to_string(), Value::NativeFunction(lower_fn.clone()));
+            props.insert("string".to_string(), Value::NativeFunction(as_string_fn.clone()));
         }
 
         // Store the namespace in the global variable
@@ -234,6 +247,12 @@ impl StdLib {
 
         // Register the String namespace accessor function
         self.register("String", 0, get_string_namespace);
+
+        // Also register static methods on String namespace
+        self.register("String.length", 1, string::len);
+        self.register("String.upper", 1, string::upper);
+        self.register("String.lower", 1, string::lower);
+        self.register("String.string", 1, string::as_string);
     }
 
     /// Register a file namespace with file I/O operations

@@ -1,0 +1,25 @@
+// String Methods Test
+// Shows how to use String methods directly
+
+print "=== String Methods Test ===";
+
+// String conversion with constructor
+var num_as_str = String(3.14159);
+print "Number as string: " + num_as_str;
+
+// Direct conversion with static method
+var bool_as_str = String.string(true);
+print "Boolean as string: " + bool_as_str;
+
+// Using static methods
+var text = "Hello, World!";
+print "Original text: " + text;
+print "Length: " + String.string(String.length(text));
+print "Uppercase: " + String.upper(text);
+print "Lowercase: " + String.lower(text);
+
+// Combining with Math methods
+var rounded = Math.round(3.7);
+print "Rounded 3.7 (via String.string): " + String.string(rounded);
+
+print "\n=== Test Complete ===";

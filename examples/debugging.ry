@@ -1,0 +1,22 @@
+// Debugging test for String and Math
+print "=== Debug Test ===";
+
+// Test 1: Simple String method
+print "Test 1: Simple String method";
+var text = "Hello";
+print "Upper: " + String.upper(text);
+print "Test 1 complete";
+
+// Test 2: String.string
+print "\nTest 2: String.string";
+var result = String.string(42);
+print "Result: " + result;
+print "Test 2 complete";
+
+// Test 3: Math.round
+print "\nTest 3: Math.round";
+var rounded = Math.round(3.7);
+print "Rounded: " + String.string(rounded);
+print "Test 3 complete";
+
+print "\n=== Debug Complete ===";

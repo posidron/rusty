@@ -50,6 +50,7 @@ This manual covers all aspects of the Rusty programming language, including synt
     - [String Manipulation Example](#string-manipulation-example)
   - [Implementation Details](#implementation-details)
   - [Limitations](#limitations)
+    - [Array Handling](#array-handling)
 
 ## Introduction
 
@@ -285,16 +286,27 @@ From highest to lowest:
 
 ## Object-Oriented Programming
 
-Rusty implements object-oriented programming through namespaces, method calls, and property access.
+Rusty implements object-oriented programming through namespaces, method calls, and property access following the JavaScript pattern.
 
 ### Namespaces Overview
 
-Namespaces are collections of related functions and values that are accessed using constructor-like functions.
+Namespaces in Rusty provide collections of related functions and constants. Namespaces are accessed directly like in JavaScript:
 
 ```rusty
-var math = Math();      // Creates a Math namespace instance
-var arr = Array();      // Creates an Array namespace instance
-var str = String();     // Creates a String namespace instance
+// Accessing namespace methods directly
+Math.abs(-42);             // Call Math.abs method with -42 as argument
+String.upper("hello");     // Call String.upper method
+Array.length([1, 2, 3]);   // Call Array.length method
+
+// Accessing namespace constants
+var pi = Math.PI;          // Access Math.PI constant
+
+// Creating arrays with constructor or literals
+var arr1 = Array(1, 2, 3); // Using constructor
+var arr2 = [1, 2, 3];      // Using literal syntax
+
+// String conversion
+var str = String(42);      // Convert number to string
 ```
 
 ### Method Calls
@@ -302,16 +314,14 @@ var str = String();     // Creates a String namespace instance
 Methods within a namespace are called using dot notation followed by parentheses and arguments:
 
 ```rusty
-var math = Math();
-print math.abs(-42);       // Calling the abs method with argument -42
+// Static method calls
+Math.abs(-42);              // Call abs method with argument -42
+String.upper("hello");      // Call upper method
+Array.length([1, 2, 3]);    // Call length method on an array
 
-var str = String();
-print str.upper("hello");   // Calling the upper method
-
-var arr = Array();
-var numbers = arr.create();
-numbers = arr.push(numbers, 1);
-print arr.length(numbers);    // Calling the length method
+// Method chaining example
+var data = JSON.parse(File.read("data.json"));
+var formatted = String.upper(Array.get(data, 0));
 ```
 
 ### Property Access
@@ -381,21 +391,23 @@ Rusty comes with a built-in standard library that provides several namespaces:
 The Math namespace provides mathematical functions and constants.
 
 ```rusty
-var math = Math();
+// Constants accessible as static properties
+Math.PI    // 3.141592653589793
+Math.E     // 2.718281828459045
 
-// Constants
-math.PI    // 3.141592653589793
-math.E     // 2.718281828459045
+// Static methods
+Math.random()             // Returns a random number between 0 and 1
+Math.random_range(1, 100) // Returns a random integer between 1 and 100
+Math.abs(-42)             // Returns 42
+Math.round(3.7)           // Returns 4
+Math.floor(3.7)           // Returns 3
+Math.ceil(3.2)            // Returns 4
+Math.min(5, 10)           // Returns 5
+Math.max(5, 10)           // Returns 10
 
-// Methods
-math.random()             // Returns a random number between 0 and 1
-math.random_range(1, 100) // Returns a random integer between 1 and 100
-math.abs(-42)             // Returns 42
-math.round(3.7)           // Returns 4
-math.floor(3.7)           // Returns 3
-math.ceil(3.2)            // Returns 4
-math.min(5, 10)           // Returns 5
-math.max(5, 10)           // Returns 10
+// Using Math methods in expressions
+var area = Math.PI * Math.pow(radius, 2);
+var rounded = Math.round(3.7);
 ```
 
 ### String Namespace
@@ -403,13 +415,19 @@ math.max(5, 10)           // Returns 10
 The String namespace provides functions for manipulating strings.
 
 ```rusty
-var str = String();
+// Creating/converting strings with constructor
+var numAsStr = String(42);           // Converts number to string: "42"
+var boolAsStr = String(true);        // Converts boolean to string: "true"
 
-// Methods
-str.length("hello")        // Returns 5
-str.upper("hello")         // Returns "HELLO"
-str.lower("HELLO")         // Returns "hello"
-str.string(42)             // Returns "42"
+// Using static String methods
+String.length("hello")        // Returns 5
+String.upper("hello")         // Returns "HELLO"
+String.lower("HELLO")         // Returns "hello"
+String.string(42)             // Alternative way to convert to string: "42"
+
+// Combining with other operations
+var rounded = Math.round(3.7);
+print "Rounded value: " + String(rounded);  // "Rounded value: 4"
 ```
 
 ### Array Namespace
@@ -440,14 +458,20 @@ am.join(numbers, ", ")     // Joins array elements into a string
 The File namespace provides functions for file operations.
 
 ```rusty
-var file = File();
+// Static methods for file operations
+File.read("path/to/file.txt")             // Reads file content as string
+File.write("path/to/file.txt", "content") // Writes string to file
+File.append("path/to/file.txt", "more")   // Appends string to file
+File.exists("path/to/file.txt")           // Checks if file exists
+File.delete("path/to/file.txt")           // Deletes the file
 
-// Methods
-file.read("path/to/file.txt")             // Reads file content as string
-file.write("path/to/file.txt", "content") // Writes string to file
-file.append("path/to/file.txt", "more")   // Appends string to file
-file.exists("path/to/file.txt")           // Checks if file exists
-file.delete("path/to/file.txt")           // Deletes the file
+// Example usage
+if (File.exists("data.txt")) {
+    var content = File.read("data.txt");
+    print "File content: " + content;
+} else {
+    File.write("data.txt", "Hello, world!");
+}
 ```
 
 ### Time Namespace
@@ -455,10 +479,15 @@ file.delete("path/to/file.txt")           // Deletes the file
 The Time namespace provides time-related functions.
 
 ```rusty
-var time = Time();
+// Get current timestamp
+var timestamp = Time.now();  // Returns current time in milliseconds since epoch
 
-// Methods
-time.now()  // Returns current time in milliseconds since epoch
+// Example of calculating elapsed time
+var start = Time.now();
+// ... do some work ...
+var end = Time.now();
+var elapsed = end - start;
+print "Operation took " + String(elapsed) + " ms";
 ```
 
 ### JSON Namespace
@@ -466,11 +495,16 @@ time.now()  // Returns current time in milliseconds since epoch
 The JSON namespace provides functions for working with JSON data.
 
 ```rusty
-var json = JSON();
+// Parse JSON string to Rusty value
+var data = JSON.parse('{"name":"John","age":30}');
 
-// Methods
-json.parse('{"name":"John","age":30}')  // Parses JSON string to Rusty value
-json.stringify(value)                   // Converts Rusty value to JSON string
+// Access parsed data
+var name = Array.get(Array.get(data, 0), 1);  // "John"
+var age = Array.get(Array.get(data, 1), 1);   // 30
+
+// Convert Rusty value to JSON string
+var person = [["name", "Alice"], ["age", 25]];
+var jsonStr = JSON.stringify(person);  // '{"name":"Alice","age":25}'
 ```
 
 ### Regex Namespace
@@ -478,17 +512,23 @@ json.stringify(value)                   // Converts Rusty value to JSON string
 The Regex namespace provides functions for working with regular expressions.
 
 ```rusty
-var regex = Regex();
+// Create and use regex patterns
+var pattern = Regex.new("[0-9]+");
+var isMatch = Regex.test(pattern, "123");       // true
+var noMatch = Regex.test(pattern, "abc");       // false
 
-// Methods
-regex.new("[0-9]+")                     // Creates a new regex pattern
-regex.test(pattern, "123")              // Tests if string matches pattern
-regex.match(pattern, "abc123def456")    // Finds all matches of pattern in string
-regex.replace(pattern, text, "X")       // Replaces all occurrences of pattern
-regex.split(pattern, text)              // Splits string by pattern
-regex.capture(pattern, text)            // Gets capture groups from first match
-regex.is_valid("[0-9]+")                // Checks if pattern is valid
-regex.escape("a.b*c")                   // Escapes special characters in string
+// Find all matches
+var matches = Regex.match(pattern, "abc123def456");  // ["123", "456"]
+
+// Replace matches
+var replaced = Regex.replace(pattern, "Order #123 contains 4 items", "X");
+// "Order #X contains X items"
+
+// Other operations
+var parts = Regex.split(pattern, "abc123def456");      // ["abc", "def", ""]
+var captured = Regex.capture(pattern, "abc123def");    // ["123"]
+var isValid = Regex.is_valid("[0-9]+");               // true
+var escaped = Regex.escape("a.b*c");                  // "a\.b\*c"
 ```
 
 ## Best Practices

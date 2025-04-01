@@ -1,0 +1,11 @@
+// Math function test
+print "=== Math Test ===";
+
+// Test constants
+print "Math.PI: " + String.string(Math.PI);
+print "Math.E: " + String.string(Math.E);
+
+// Test Math.round - direct method access
+print "Math.round(3.7): " + String.string(Math.round(3.7));
+
+print "=== Done ===";
